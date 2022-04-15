@@ -1,0 +1,37 @@
+plugins {
+    id "org.flywaydb.flyway" version "${flywayVersion}"
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+
+flyway {
+    def dbHost = "localhost"
+    def dbPort = "55432"
+    def dbUser = "example-user"
+    def dbPassword = "weak-password"
+    if(project.hasProperty('argDbHost')) {
+        dbHost = "$argDbHost"
+    }
+    if(project.hasProperty('argDbPort')) {
+        dbPort = "$argDbPort"
+    }
+    if(project.hasProperty('argDbUser')) {
+        dbUser = "$argDbUser"
+    }
+    if(project.hasProperty('argDbPassword')) {
+        dbPassword = "$argDbPassword"
+    }
+
+    url = "jdbc:postgresql://$dbHost:$dbPort/example_db"
+    user = "$dbUser"
+    password = "$dbPassword"
+}
+
+dependencies {
+    implementation "org.postgresql:postgresql:${postgresqlJdbcVersion}"
+    implementation "org.flywaydb:flyway-core:${flywayVersion}"
+}

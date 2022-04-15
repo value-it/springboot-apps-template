@@ -1,0 +1,8 @@
+repositories {mavenCentral()}
+configurations {tools}
+dependencies {tools 'com.github.tntim96:fakesmtp:2.0'}
+
+task startMockSmtpServer(type: JavaExec) {
+    classpath = configurations.tools
+    main = 'com.nilhcem.fakesmtp.FakeSMTP'
+}
