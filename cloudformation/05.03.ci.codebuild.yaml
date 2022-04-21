@@ -46,6 +46,8 @@ Resources:
           !Sub CodebuildRole-${ProjectName}
       Environment:
         Type: LINUX_CONTAINER
+        # CodeBuild内でdockerビルドできるようにするために特権付与
+        PrivilegedMode: True
         ComputeType: BUILD_GENERAL1_SMALL
         # BUILD_GENERAL1_SMALL  = 2vCPU/RAM3GB
         # BUILD_GENERAL1_MEDIUM = 4vCPU/RAM7GB
