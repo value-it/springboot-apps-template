@@ -20,24 +20,6 @@
           "containerPort": 38080
         }
       ],
-      "secrets": [
-        {
-          "name": "DATABASE_HOSTNAME",
-          "valueFrom": "/SPRINGBOOT_APPS_TEMPLATE/DATABASE_HOSTNAME"
-        },
-        {
-          "name": "DATABASE_PORT",
-          "valueFrom": "/SPRINGBOOT_APPS_TEMPLATE/DATABASE_PORT"
-        },
-        {
-          "name": "DATABASE_USERNAME",
-          "valueFrom": "/SPRINGBOOT_APPS_TEMPLATE/DATABASE_USERNAME"
-        },
-        {
-          "name": "DATABASE_PASSWORD",
-          "valueFrom": "/SPRINGBOOT_APPS_TEMPLATE/DATABASE_PASSWORD"
-        }
-      ],
       "healthCheck": {
         "command": [
           "CMD-SHELL",

@@ -107,9 +107,9 @@ Resources:
               InputArtifacts:
                 - Name: BuildArtifact
               Configuration:
-                AppSpecTemplateArtifact: SourceArtifact
+                AppSpecTemplateArtifact: BuildArtifact
                 AppSpecTemplatePath: appspec.yaml
-                TaskDefinitionTemplateArtifact: SourceArtifact
+                TaskDefinitionTemplateArtifact: BuildArtifact
                 TaskDefinitionTemplatePath: taskdef.json
                 ApplicationName: !Sub DeployApp-${ProjectName}
                 DeploymentGroupName: !Sub DeploymentGroup-${ProjectName}

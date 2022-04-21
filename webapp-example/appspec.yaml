@@ -5,5 +5,5 @@ Resources:
       Properties:
         TaskDefinition: <TASK_DEFINITION>
         LoadBalancerInfo:
-          ContainerName: "appserver"
+          ContainerName: "bootapps-tmpl-base"
           ContainerPort: "38080"

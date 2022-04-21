@@ -180,7 +180,7 @@ Resources:
                   - ecr:InitiateLayerUpload
                   - ecr:GetRepositoryPolicy
                 Effect: Allow
-                Resource: !Sub arn:aws:ecr:*:${AWS::AccountId}:bootapps-tmpl-application/*
+                Resource: !Sub arn:aws:ecr:*:${AWS::AccountId}:bootapps-tmpl/*
 
 # - - - - - - - - - - - - - - - - -
   CodePipelineRole:

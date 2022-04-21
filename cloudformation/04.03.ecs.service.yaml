@@ -42,7 +42,7 @@ Resources:
             Fn::ImportValue:
               !Sub ${ProjectName}-alb-targetgroup-blue
           ContainerPort: 38080
-          ContainerName: appserver
+          ContainerName: !Sub ${ProjectName}-base
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: DISABLED
