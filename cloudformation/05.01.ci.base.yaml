@@ -136,6 +136,15 @@ Resources:
                   - secretsmanager:GetSecretValue
                 Effect: Allow
                 Resource: '*'
+        - PolicyName: SystemsManagerGetParameter
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - ssm:GetParameters
+                  - ssm:GetParameter
+                Effect: Allow
+                Resource: '*'
 
 # - - - - - - - - - - - - - - - - -
   CodePipelineRole:
@@ -184,6 +193,15 @@ Resources:
                   - codecommit:GetCommit
                   - codecommit:GetUploadArchiveStatus
                   - codecommit:UploadArchive
+                Effect: Allow
+                Resource: '*'
+        - PolicyName: SystemsManagerGetParameter
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - ssm:GetParameters
+                  - ssm:GetParameter
                 Effect: Allow
                 Resource: '*'
 
