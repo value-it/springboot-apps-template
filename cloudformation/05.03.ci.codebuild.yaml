@@ -61,7 +61,7 @@ Resources:
             Value: !Ref Stage
             Type: PLAINTEXT
           - Name: IMAGE_REPOSITORY_NAME
-            Value: !Sub "${ProjectName}-application"
+            Value: !Sub "${ProjectName}/application"
             Type: PLAINTEXT
 
       Source:

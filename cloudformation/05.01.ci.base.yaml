@@ -145,6 +145,42 @@ Resources:
                   - ssm:GetParameter
                 Effect: Allow
                 Resource: '*'
+        - PolicyName: EcrBuildDeploy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - ecr:PutImageTagMutability
+                  - ecr:StartImageScan
+                  - ecr:DescribeImageReplicationStatus
+                  - ecr:ListTagsForResource
+                  - ecr:UploadLayerPart
+                  - ecr:BatchDeleteImage
+                  - ecr:ListImages
+                  - ecr:BatchGetRepositoryScanningConfiguration
+                  - ecr:DeleteRepository
+                  - ecr:CompleteLayerUpload
+                  - ecr:TagResource
+                  - ecr:DescribeRepositories
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:ReplicateImage
+                  - ecr:GetLifecyclePolicy
+                  - ecr:PutLifecyclePolicy
+                  - ecr:DescribeImageScanFindings
+                  - ecr:GetLifecyclePolicyPreview
+                  - ecr:CreateRepository
+                  - ecr:PutImageScanningConfiguration
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:DeleteLifecyclePolicy
+                  - ecr:PutImage
+                  - ecr:UntagResource
+                  - ecr:BatchGetImage
+                  - ecr:DescribeImages
+                  - ecr:StartLifecyclePolicyPreview
+                  - ecr:InitiateLayerUpload
+                  - ecr:GetRepositoryPolicy
+                Effect: Allow
+                Resource: !Sub arn:aws:ecr:*:${AWS::AccountId}:bootapps-tmpl-application/*
 
 # - - - - - - - - - - - - - - - - -
   CodePipelineRole:
