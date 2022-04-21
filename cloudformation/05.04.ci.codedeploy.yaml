@@ -1,0 +1,67 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CI CodeDeploy.'
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: bootapps-tmpl
+
+
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+Resources:
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+  Application:
+    Type: "AWS::CodeDeploy::Application"
+    Properties:
+      ApplicationName: !Sub DeployApp-${ProjectName}
+      ComputePlatform: ECS
+
+  DeploymentGroup:
+    Type: AWS::CodeDeploy::DeploymentGroup
+    Properties:
+      ApplicationName: !Ref Application
+      DeploymentGroupName: !Sub DeploymentGroup-${ProjectName}
+      DeploymentStyle:
+        DeploymentType: BLUE_GREEN
+        DeploymentOption: WITH_TRAFFIC_CONTROL
+      BlueGreenDeploymentConfiguration:
+        DeploymentReadyOption:
+          ActionOnTimeout: CONTINUE_DEPLOYMENT
+          WaitTimeInMinutes: 0
+        TerminateBlueInstancesOnDeploymentSuccess:
+          Action: TERMINATE
+          TerminationWaitTimeInMinutes: 5
+      DeploymentConfigName: CodeDeployDefault.ECSAllAtOnce
+      LoadBalancerInfo:
+        TargetGroupPairInfoList:
+          - TargetGroups:
+            - Name: !Sub ${ProjectName}-blue-tg
+            - Name: !Sub ${ProjectName}-green-tg
+            ProdTrafficRoute:
+              ListenerArns:
+                - Fn::ImportValue: !Sub ${ProjectName}-alb-listener-prod
+            TestTrafficRoute:
+              ListenerArns:
+                - Fn::ImportValue: !Sub ${ProjectName}-alb-listener-test
+      ECSServices:
+        - ClusterName:
+            !Sub ${ProjectName}-cluster
+          ServiceName:
+            !Sub ${ProjectName}-service
+      ServiceRoleArn:
+        Fn::ImportValue:
+          !Sub CodeDeployRoleArn-${ProjectName}
+
+
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+Outputs:
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+
+  # - - - - - - - - - - - - - - - - -
+  DeploymentGroup:
+    Value: !Ref DeploymentGroup
+    Export:
+      Name: !Join
+        - '-'
+        - - DeploymentGroup
+          - !Sub ${ProjectName}

@@ -1,0 +1,117 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CI CodePipeline.'
+Parameters:
+  ProjectName:
+    Type: String
+    Default: bootapps-tmpl
+
+  Stage:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - stg
+      - prd
+
+  GithubOrganization:
+    Type: String
+    Default: value-it
+
+  GithubRepository:
+    Type: String
+    Default: springboot-apps-template
+
+  GithubBranch:
+    Type: String
+    Default: master
+
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+Resources:
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+
+# - - - - - - - - - - - - - - - - -
+  CodePipeline:
+# - - - - - - - - - - - - - - - - -
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      ArtifactStore:
+        Type: S3
+        Location:
+            Fn::ImportValue:
+              !Sub S3Bucket-${ProjectName}-resources-${Stage}
+      Name: !Join
+              - '-'
+              - - !Ref ProjectName
+                - deploy
+                - pipeline
+      RoleArn:
+        Fn::ImportValue:
+          !Sub CodePipelineRoleArn-${ProjectName}
+      Stages:
+        -
+          Name: Source
+          Actions:
+            -
+              Name: Source
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Version: 1
+                Provider: GitHub
+              OutputArtifacts:
+                -
+                  Name: SourceArtifact
+              Configuration:
+                Branch: !Ref GithubBranch
+                Owner: !Ref GithubOrganization
+                PollForSourceChanges: false
+                Repo: !Ref GithubRepository
+                OAuthToken: '{{resolve:secretsmanager:SpringBootAppsTemplate:SecretString:GitHubSecretToken}}'
+              RunOrder: 1
+
+        -
+          Name: Build
+          Actions:
+            -
+              Name: Build
+              InputArtifacts:
+                -
+                  Name: SourceArtifact
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              Configuration:
+                ProjectName:
+                  Fn::ImportValue:
+                    !Join
+                      - '-'
+                      - - CodeBuild
+                        - !Ref ProjectName
+              OutputArtifacts:
+                -
+                  Name: BuildArtifact
+              RunOrder: 1
+
+        -
+          Name: Deploy
+          Actions:
+            -
+              Name: DeployStage
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CodeDeployToECS
+              InputArtifacts:
+                - Name: BuildArtifact
+              Configuration:
+                AppSpecTemplateArtifact: SourceArtifact
+                AppSpecTemplatePath: appspec.yaml
+                TaskDefinitionTemplateArtifact: SourceArtifact
+                TaskDefinitionTemplatePath: taskdef.json
+                ApplicationName: !Sub DeployApp-${ProjectName}
+                DeploymentGroupName: !Sub DeploymentGroup-${ProjectName}
+                Image1ArtifactName: BuildArtifact
+                Image1ContainerName: IMAGE1_NAME

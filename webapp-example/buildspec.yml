@@ -1,0 +1,54 @@
+version: 0.2
+
+env:
+  variables:
+    DOCKER_BUILDKIT: "1"
+  parameter-store:
+    DOCKERHUB_USERNAME: /$ENV/DOCKERHUB_USERNAME
+    DOCKERHUB_PASSWORD: /$ENV/DOCKERHUB_PASSWORD
+
+phases:
+  pre_build:
+    commands:
+      - DEFAULT=`pwd`
+      - echo install corretto15
+      - yum install -y https://corretto.aws/downloads/resources/15.0.2.7.1/java-15-amazon-corretto-devel-15.0.2.7-1.x86_64.rpm
+      - ln -fs /usr/lib/jvm/java-15-amazon-corretto/bin/java /usr/bin/java
+      - export JAVA_HOME="/usr/lib/jvm/java-15-amazon-corretto"
+
+      - echo login ECR
+      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+
+      ## TODO DockerHubを利用しない
+      - echo login Docker Hub
+      - echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
+
+      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+  build:
+    commands:
+      - echo build webapp-example
+      - ./gradlew webapp-example:build
+
+      - echo build webapp-example Docker image
+      - cd ./webapp-example
+      - docker image build -t $IMAGE_REPOSITORY_NAME:$IMAGE_TAG .
+      - docker image tag $IMAGE_REPOSITORY_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPOSITORY_NAME:$IMAGE_TAG
+      - docker image tag $IMAGE_REPOSITORY_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPOSITORY_NAME:latest
+  post_build:
+    commands:
+      - docker image push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPOSITORY_NAME:latest
+      - docker image push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPOSITORY_NAME:$IMAGE_TAG
+      - cp appspec.yaml $DEFAULT/
+      - cp ./codesuite/${ENV,,}/taskdef.json $DEFAULT/
+      - cd $DEFAULT
+      - sed -i -e "s/<AWS_ACCOUNT_ID>/$AWS_ACCOUNT_ID/g" taskdef.json
+      - printf '{"Version":"1.0","ImageURI":"%s"}' $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPOSITORY_NAME:$IMAGE_TAG > imageDetail.json
+artifacts:
+  files:
+    - appspec.yaml
+    - taskdef.json
+    - imageDetail.json
+cache:
+  paths:
+    - '/root/.gradle/caches/**/*'

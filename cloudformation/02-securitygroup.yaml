@@ -1,0 +1,162 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Security Group'
+Parameters:
+  ProjectName:
+    Type: String
+    Default: bootapps-tmpl
+  CidrBlockAll:
+    Type: String
+    Default: 0.0.0.0/0
+
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+Resources:
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+# - - - - - - - - - - - - - - - - -
+  SecurityGroupALB:
+# - - - - - - - - - - - - - - - - -
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${ProjectName}-ALB
+      GroupDescription: To connect to the ALB from the Internet
+      VpcId:
+        Fn::ImportValue:
+          !Sub ${ProjectName}-network-vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: !Ref CidrBlockAll
+          Description: HTTPS From Internet
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp:
+            Fn::ImportValue:
+              !Sub ${ProjectName}-network-vpc-cidrblock
+          Description: ALB to VPC
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ProjectName
+              - ALB
+        - Key: ProjectName
+          Value: !Ref ProjectName
+
+# - - - - - - - - - - - - - - - - -
+  SecurityGroupECS:
+# - - - - - - - - - - - - - - - - -
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${ProjectName}-ECS
+      GroupDescription: To connect to ECS from ALB
+      VpcId:
+        Fn::ImportValue:
+          !Sub ${ProjectName}-network-vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 38080
+          ToPort: 38080
+          SourceSecurityGroupId: !Ref SecurityGroupALB
+          SourceSecurityGroupOwnerId: !Ref AWS::AccountId
+          Description: HTTP From ALBs
+
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: !Ref CidrBlockAll
+          Description: ALL Traffic IPv4
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ProjectName
+              - ECS
+        - Key: ProjectName
+          Value: !Ref ProjectName
+
+# - - - - - - - - - - - - - - - - -
+  SecurityGroupAuroraPostgreSQL:
+# - - - - - - - - - - - - - - - - -
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${ProjectName}-PostgreSQL
+      GroupDescription: To connect to Aurora PostgreSQL from Server
+      VpcId:
+        Fn::ImportValue:
+          !Sub ${ProjectName}-network-vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref SecurityGroupECS
+          SourceSecurityGroupOwnerId: !Ref AWS::AccountId
+          Description: PostgreSQL From ECS
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref SecurityGroupCodebuild
+          SourceSecurityGroupOwnerId: !Ref AWS::AccountId
+          Description: PostgreSQL From Codebuild
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: !Ref CidrBlockAll
+          Description: ALL Traffic IPv4
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ProjectName
+              - PostgreSQL
+        - Key: ProjectName
+          Value: !Ref ProjectName
+
+# - - - - - - - - - - - - - - - - -
+  SecurityGroupCodebuild:
+# - - - - - - - - - - - - - - - - -
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${ProjectName}-Codebuild
+      GroupDescription: To connect to Codebuild in VPC
+      VpcId:
+        Fn::ImportValue:
+          !Sub ${ProjectName}-network-vpc
+      SecurityGroupIngress:
+        - IpProtocol: -1
+          CidrIp:
+            Fn::ImportValue:
+              !Sub ${ProjectName}-network-vpc-cidrblock
+          Description: ALL From VPC
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: !Ref CidrBlockAll
+          Description: ALL to ALL
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ProjectName
+              - Codebuild
+        - Key: ProjectName
+          Value: !Ref ProjectName
+
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+Outputs:
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+  SecurityGroupALB:
+    Value: !Ref SecurityGroupALB
+    Export:
+      Name: !Sub "${ProjectName}-sg-alb"
+
+  SecurityGroupECS:
+    Value: !Ref SecurityGroupECS
+    Export:
+      Name: !Sub "${ProjectName}-sg-ecs"
+
+  SecurityGroupAuroraPostgreSQL:
+    Value: !Ref SecurityGroupAuroraPostgreSQL
+    Export:
+      Name: !Sub "${ProjectName}-sg-postgresql"
+
+  SecurityGroupCodebuild:
+    Value: !Ref SecurityGroupCodebuild
+    Export:
+      Name: !Sub "${ProjectName}-sg-codebuild"

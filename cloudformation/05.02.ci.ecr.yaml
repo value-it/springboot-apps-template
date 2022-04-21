@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CI ECR.'
+Parameters:
+  ProjectName:
+    Type: String
+    Default: bootapps-tmpl
+
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+Resources:
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+# - - - - - - - - - - - - - - - - -
+  Repository:
+# - - - - - - - - - - - - - - - - -
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Join
+            - '/'
+            - - !Ref ProjectName
+              - 'application'
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Keep all tagged images and untagged 20 images, expire all others",
+                "action": {
+                  "type": "expire"
+                },
+                "selection": {
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 20,
+                  "tagStatus": "untagged"
+                }
+              }
+            ]
+          }
+
+#  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Outputs:
+#  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# - - - - - - - - - - - - - - - - -
+  Repository:
+    Value: !Ref Repository
+    Export:
+      Name: !Join
+            - '-'
+            - - EcrRepository
+              - !Ref ProjectName
+              - 'application'

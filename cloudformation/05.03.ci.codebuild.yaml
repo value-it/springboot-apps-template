@@ -1,0 +1,92 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Codebuild.'
+Parameters:
+  ProjectName:
+    Type: String
+    Default: bootapps-tmpl
+
+  Stage:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - stg
+      - prd
+
+  GithubOrganization:
+    Type: String
+    Default: value-it
+
+  GithubRepository:
+    Type: String
+    Default: springboot-apps-template
+
+  ApplicationName:
+    Type: String
+    Default: webapp-example
+
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+Resources:
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+  # - - - - - - - - - - - - - - - - -
+  CodeBuild:
+  # - - - - - - - - - - - - - - - - -
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      BadgeEnabled: false
+      Description: !Sub "build ${ProjectName} application"
+      Name: !Join
+        - '-'
+        - - !Ref ProjectName
+          - app-buiild
+      ServiceRole:
+        Fn::ImportValue:
+          !Sub CodebuildRole-${ProjectName}
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        # BUILD_GENERAL1_SMALL  = 2vCPU/RAM3GB
+        # BUILD_GENERAL1_MEDIUM = 4vCPU/RAM7GB
+        # BUILD_GENERAL1_LARGE  = 8vCPU/RAM15GB
+        Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+        EnvironmentVariables:
+          # ======================
+          # 環境変数
+          # ======================
+          - Name: ENV
+            Value: !Ref Stage
+            Type: PLAINTEXT
+          - Name: IMAGE_REPOSITORY_NAME
+            Value: !Sub "${ProjectName}-application"
+            Type: PLAINTEXT
+
+      Source:
+        GitCloneDepth: 1
+        Location:
+          !Join
+          - ''
+          - - 'https://github.com/'
+            - !Ref GithubOrganization
+            - '/'
+            - !Ref GithubRepository
+            - '.git'
+        Type: GITHUB
+        Auth:
+          Type: OAUTH
+        BuildSpec: !Sub "${ApplicationName}/buildspec.yml"
+      TimeoutInMinutes: 60
+
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+Outputs:
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+
+  # - - - - - - - - - - - - - - - - -
+  CodeBuild:
+    Value: !Ref CodeBuild
+    Export:
+      Name: !Join
+        - '-'
+        - - CodeBuild
+          - !Sub ${ProjectName}

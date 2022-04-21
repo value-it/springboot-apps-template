@@ -6,17 +6,11 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@Profile("with_db")
-public class ExampleDataSource implements ExampleRepository {
+@Profile("without_db")
+public class ExampleDataSourceNoDB implements ExampleRepository {
 
     @Override
     public Example findOne() {
-        return mapper.findOne();
-    }
-
-    private final ExampleMapper mapper;
-
-    public ExampleDataSource(ExampleMapper mapper) {
-        this.mapper = mapper;
+        return new Example("DB接続無しのダミー値");
     }
 }

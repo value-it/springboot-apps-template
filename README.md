@@ -1,5 +1,7 @@
 # SpringBootアプリ雛形
 
+- dockerで起動したPostgreSQLから値を取得して表示するだけのサンプルプログラム
+
 ### 要Java17
 https://aws.amazon.com/jp/corretto/
 
@@ -21,6 +23,11 @@ https://aws.amazon.com/jp/corretto/
 ### サンプルWEBアプリ起動
 ```shell
 ./tools/scripts/run-webapp
+```
+
+### DB接続無しでサンプルWEBアプリ起動
+```shell
+./tools/scripts/run-webapp-without-db
 ```
 
 ---

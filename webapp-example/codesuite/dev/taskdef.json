@@ -1,0 +1,68 @@
+{
+  "taskRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/bootapps-tmpl-ECS-ExecRole",
+  "executionRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/bootapps-tmpl-ECS-ExecRole",
+  "containerDefinitions": [
+    {
+      "name": "bootapps-tmpl-base",
+      "image": "<IMAGE1_NAME>",
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/bootapps-tmpl",
+          "awslogs-region": "ap-northeast-1",
+          "awslogs-stream-prefix": "dev"
+        }
+      },
+      "portMappings": [
+        {
+          "hostPort": 38080,
+          "protocol": "tcp",
+          "containerPort": 38080
+        }
+      ],
+      "secrets": [
+        {
+          "name": "DATABASE_HOSTNAME",
+          "valueFrom": "/SPRINGBOOT_APPS_TEMPLATE/DATABASE_HOSTNAME"
+        },
+        {
+          "name": "DATABASE_PORT",
+          "valueFrom": "/SPRINGBOOT_APPS_TEMPLATE/DATABASE_PORT"
+        },
+        {
+          "name": "DATABASE_USERNAME",
+          "valueFrom": "/SPRINGBOOT_APPS_TEMPLATE/DATABASE_USERNAME"
+        },
+        {
+          "name": "DATABASE_PASSWORD",
+          "valueFrom": "/SPRINGBOOT_APPS_TEMPLATE/DATABASE_PASSWORD"
+        }
+      ],
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "curl -f http://localhost:38080/actuator/health | grep UP || exit 1"
+        ],
+        "interval": 5,
+        "timeout": 5,
+        "retries": 5,
+        "startPeriod": 180
+      },
+      "essential": true,
+      "ulimits": [
+        {
+          "name": "nofile",
+          "softLimit": 65536,
+          "hardLimit": 65536
+        }
+      ]
+    }
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "512",
+  "family": "bootapps-tmpl-base"
+}

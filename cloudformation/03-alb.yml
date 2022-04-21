@@ -1,0 +1,214 @@
+AWSTemplateFormatVersion:
+  "2010-09-09"
+Description: "ALB"
+
+# ------------------------------------------------------------#
+# Input Parameters
+# ------------------------------------------------------------#
+Parameters:
+  ProjectName:
+    Type: String
+    Default: bootapps-tmpl
+
+
+Resources:
+  # - - - - - - - - - - - - - - - - -
+  ALBTargetGroupBlue:
+  # - - - - - - - - - - - - - - - - -
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: "/actuator/health"
+      HealthCheckPort: traffic-port
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: 200
+      Name: !Sub ${ProjectName}-blue-tg
+      Port: 38080
+      Protocol: HTTP
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-blue-tg
+      TargetGroupAttributes:
+        - Key: "deregistration_delay.timeout_seconds"
+          Value: 60
+        - Key: "slow_start.duration_seconds"
+          Value: 30
+        - Key: "stickiness.enabled"
+          Value: true
+        - Key: "stickiness.type"
+          Value: lb_cookie
+        - Key: "stickiness.lb_cookie.duration_seconds"
+          Value: 604800
+      TargetType: ip
+      VpcId:
+        Fn::ImportValue:
+          !Sub ${ProjectName}-network-vpc
+
+  # - - - - - - - - - - - - - - - - -
+  ALBTargetGroupGreen:
+    # - - - - - - - - - - - - - - - - -
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: "/actuator/health"
+      HealthCheckPort: traffic-port
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: 200
+      Name: !Sub ${ProjectName}-green-tg
+      Port: 38080
+      Protocol: HTTP
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-green-tg
+      TargetGroupAttributes:
+        - Key: "deregistration_delay.timeout_seconds"
+          Value: 60
+        - Key: "slow_start.duration_seconds"
+          Value: 30
+        - Key: "stickiness.enabled"
+          Value: true
+        - Key: "stickiness.type"
+          Value: lb_cookie
+        - Key: "stickiness.lb_cookie.duration_seconds"
+          Value: 604800
+      TargetType: ip
+      VpcId:
+        Fn::ImportValue:
+          !Sub ${ProjectName}-network-vpc
+
+  # ------------------------------------------------------------#
+  #  ALB
+  # ------------------------------------------------------------#
+  InternetALB:
+    Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
+    Properties:
+      Name: !Sub "${ProjectName}-network-alb"
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectName}-network-alb"
+      # 内部向けかインターネット向け
+      Scheme: "internet-facing"
+      # ロードバランサーの属性
+      LoadBalancerAttributes:
+        # 削除保護が有効化されているかどうかを示します
+        - Key: "deletion_protection.enabled"
+          Value: false
+          # アイドルタイムアウト値
+        - Key: "idle_timeout.timeout_seconds"
+          Value: 60
+      SecurityGroups:
+        - Fn::ImportValue:
+            !Sub ${ProjectName}-sg-alb
+      # 起動するサブネット
+      Subnets:
+        - Fn::ImportValue:
+            !Sub ${ProjectName}-network-public1-subnet
+        - Fn::ImportValue:
+            !Sub ${ProjectName}-network-public2-subnet
+
+  # - - - - - - - - - - - - - - - - -
+  ALBListenerRuleForProd:
+    # - - - - - - - - - - - - - - - - -
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref ALBTargetGroupBlue
+      Conditions:
+        - Field: path-pattern
+          PathPatternConfig:
+            Values:
+              - "/*"
+      ListenerArn: !Ref ALBListenerForProd
+      Priority: 100
+
+  # - - - - - - - - - - - - - - - - -
+  ALBListenerRuleForTest:
+    # - - - - - - - - - - - - - - - - -
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref ALBTargetGroupBlue
+      Conditions:
+        - Field: path-pattern
+          PathPatternConfig:
+            Values:
+              - "/*"
+      ListenerArn: !Ref ALBListenerForTest
+      Priority: 100
+
+  ALBListenerForProd:
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
+    DependsOn:
+      - ALBTargetGroupBlue
+      - ALBTargetGroupGreen
+      - InternetALB
+    Properties:
+      # デフォルトルールのアクション
+      DefaultActions:
+        - FixedResponseConfig:
+            ContentType: text/plain
+            MessageBody: "503 Error"
+            StatusCode: 503
+          Type: fixed-response
+      LoadBalancerArn: !Ref InternetALB
+      Port: 80
+      Protocol: HTTP
+
+  ALBListenerForTest:
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
+    DependsOn:
+      - ALBTargetGroupBlue
+      - ALBTargetGroupGreen
+      - InternetALB
+    Properties:
+      # デフォルトルールのアクション
+      DefaultActions:
+        - FixedResponseConfig:
+            ContentType: text/plain
+            MessageBody: "503 Error"
+            StatusCode: 503
+          Type: fixed-response
+      LoadBalancerArn: !Ref InternetALB
+      Port: 81
+      Protocol: HTTP
+
+# ------------------------------------------------------------#
+# Output Parameters
+# ------------------------------------------------------------#
+Outputs:
+  # ALB
+  InternetALB:
+    Value: !Ref InternetALB
+    Export:
+      Name: !Sub "${ProjectName}-network-alb"
+
+  # ALB Listener
+  ALBListenerForProd:
+    Value: !Ref ALBListenerForProd
+    Export:
+      Name: !Sub "${ProjectName}-alb-listener-prod"
+
+  # ALB Listener
+  ALBListenerForTest:
+    Value: !Ref ALBListenerForTest
+    Export:
+      Name: !Sub "${ProjectName}-alb-listener-test"
+
+  # - - - - - - - - - - - - - - - - -
+  ALBTargetGroupBlue:
+    Value: !Ref ALBTargetGroupBlue
+    Export:
+      Name: !Sub "${ProjectName}-alb-targetgroup-blue"
+
+  ALBTargetGroupGreen:
+    Value: !Ref ALBTargetGroupGreen
+    Export:
+      Name: !Sub "${ProjectName}-alb-targetgroup-green"

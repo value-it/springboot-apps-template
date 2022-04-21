@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'ECS Role, LogGroup'
+Parameters:
+  ProjectName:
+    Type: String
+    Default: bootapps-tmpl
+
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+Resources:
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/ecs/${ProjectName}'
+      RetentionInDays: 365
+
+  ExecRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join
+              - '-'
+              - - !Ref ProjectName
+                - ECS
+                - ExecRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+Outputs:
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+# - - - - - - - - - - - - - - - - -
+  LogGroup:
+    Value: !Ref LogGroup
+    Export:
+      Name: !Join
+        - '-'
+        - - ECS
+          - LogGroup
+          - !Ref ProjectName
+
+# - - - - - - - - - - - - - - - - -
+  ExecRole:
+    Value: !Ref ExecRole
+    Export:
+      Name: !Join
+            - '-'
+            - - ECS
+              - ExecRole
+              - !Ref ProjectName
+
+# - - - - - - - - - - - - - - - - -
+  ExecRoleArn:
+    Value: !GetAtt ExecRole.Arn
+    Export:
+      Name: !Join
+            - '-'
+            - - ECS
+              - ExecRoleArn
+              - !Ref ProjectName
