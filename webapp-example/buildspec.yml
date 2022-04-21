@@ -11,10 +11,10 @@ phases:
   pre_build:
     commands:
       - DEFAULT=`pwd`
-      - echo install corretto15
-      - yum install -y https://corretto.aws/downloads/resources/15.0.2.7.1/java-15-amazon-corretto-devel-15.0.2.7-1.x86_64.rpm
-      - ln -fs /usr/lib/jvm/java-15-amazon-corretto/bin/java /usr/bin/java
-      - export JAVA_HOME="/usr/lib/jvm/java-15-amazon-corretto"
+      - echo install corretto17
+      - yum install -y https://corretto.aws/downloads/latest/amazon-corretto-17-x64-linux-jdk.rpm
+      - ln -fs /usr/lib/jvm/java-17-amazon-corretto/bin/java /usr/bin/java
+      - export JAVA_HOME="/usr/lib/jvm/java-17-amazon-corretto"
 
       - echo login ECR
       - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)

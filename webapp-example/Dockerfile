@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 amazoncorretto:15
+FROM --platform=linux/amd64 amazoncorretto:17
 VOLUME /tmp
 RUN mkdir /application
 WORKDIR /application
