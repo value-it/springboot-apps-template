@@ -29,11 +29,12 @@ Resources:
     Type: AWS::ECS::Service
     Properties:
       Cluster: !Ref ECSCluster
-      DeploymentController: CODE_DEPLOY
+      DeploymentController:
+        Type: CODE_DEPLOY
       DeploymentConfiguration:
         MaximumPercent: 200
         MinimumHealthyPercent: 100
-      DesiredCount: 0
+      DesiredCount: 1
       HealthCheckGracePeriodSeconds: 300
       LaunchType: FARGATE
       LoadBalancers:
@@ -77,7 +78,7 @@ Resources:
       - ECSService
     Properties:
       MaxCapacity: 10
-      MinCapacity: 0
+      MinCapacity: 1
       ResourceId: !Join
           - /
           - - service

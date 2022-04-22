@@ -36,9 +36,9 @@ Resources:
     Properties:
       ContainerDefinitions:
         -
-          Name: appserver
+          Name: !Sub ${ProjectName}-base
           Image: !Sub
-            - ${AwsAccountId}.dkr.ecr.ap-northeast-1.amazonaws.com/${ProjectName}/appserver:latest
+            - ${AwsAccountId}.dkr.ecr.ap-northeast-1.amazonaws.com/${ProjectName}/application:latest
             - AwsAccountId:
                 !Ref AWS::AccountId
           LogConfiguration:
