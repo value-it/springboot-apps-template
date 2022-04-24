@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@Profile("default")
+@Profile("without_db")
 public class ExampleDataSourceNoDB implements ExampleRepository {
 
     @Override
