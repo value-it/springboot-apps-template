@@ -9,6 +9,13 @@ Parameters:
     Type: String
     Default: base
 
+  MinCapacity:
+    Type: String
+    Default: 0
+
+  MaxCapacity:
+    Type: String
+    Default: 10
 
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 Resources:
@@ -34,7 +41,7 @@ Resources:
       DeploymentConfiguration:
         MaximumPercent: 200
         MinimumHealthyPercent: 100
-      DesiredCount: 1
+      DesiredCount: !Ref MinCapacity
       HealthCheckGracePeriodSeconds: 300
       LaunchType: FARGATE
       LoadBalancers:
@@ -77,8 +84,8 @@ Resources:
     DependsOn:
       - ECSService
     Properties:
-      MaxCapacity: 10
-      MinCapacity: 1
+      MaxCapacity: !Ref MaxCapacity
+      MinCapacity: !Ref MinCapacity
       ResourceId: !Join
           - /
           - - service

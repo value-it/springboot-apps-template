@@ -54,7 +54,7 @@ aws cloudformation deploy \
 --stack-name springboot-apps-template-ecs-task \
 --template-file ./04.02.ecs.task.def.yaml
 
-# ECSサービス
+# ECSサービス（一旦ハコだけつくるのでタスク数は0）
 aws cloudformation deploy \
 --stack-name springboot-apps-template-ecs-service \
 --template-file ./04.03.ecs.service.yaml
@@ -87,4 +87,14 @@ aws cloudformation deploy \
 aws cloudformation deploy \
 --stack-name springboot-apps-template-ci-codepipeline \
 --template-file ./05.05.ci.codepipeline.yaml
+```
+
+
+
+## ECSタスク数を1で起動
+```shell
+aws cloudformation deploy \
+--stack-name springboot-apps-template-ecs-service \
+--template-file ./04.03.ecs.service.yaml \
+--parameter-overrides DesiredCount=1
 ```

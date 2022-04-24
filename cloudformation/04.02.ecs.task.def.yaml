@@ -59,6 +59,9 @@ Resources:
       ExecutionRoleArn:
         Fn::ImportValue:
           !Sub ECS-ExecRoleArn-${ProjectName}
+      TaskRoleArn:
+        Fn::ImportValue:
+          !Sub ECS-TaskRoleArn-${ProjectName}
       Family: !Sub '${ProjectName}-${EcsNameSuffix}'
       NetworkMode: awsvpc
       Cpu: !FindInMap [ spec, !Ref Stage, CPU ]

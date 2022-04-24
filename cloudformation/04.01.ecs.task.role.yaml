@@ -14,7 +14,7 @@ Resources:
       LogGroupName: !Sub '/ecs/${ProjectName}'
       RetentionInDays: 365
 
-  ExecRole:
+  TaskExecRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Join
@@ -36,6 +36,30 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
 
+
+  TaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join
+        - '-'
+        - - !Ref ProjectName
+          - ECS
+          - TaskRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 Outputs:
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
@@ -50,8 +74,8 @@ Outputs:
           - !Ref ProjectName
 
 # - - - - - - - - - - - - - - - - -
-  ExecRole:
-    Value: !Ref ExecRole
+  TaskExecRole:
+    Value: !Ref TaskExecRole
     Export:
       Name: !Join
             - '-'
@@ -60,11 +84,31 @@ Outputs:
               - !Ref ProjectName
 
 # - - - - - - - - - - - - - - - - -
-  ExecRoleArn:
-    Value: !GetAtt ExecRole.Arn
+  TaskExecRoleArn:
+    Value: !GetAtt TaskExecRole.Arn
     Export:
       Name: !Join
             - '-'
             - - ECS
               - ExecRoleArn
               - !Ref ProjectName
+
+  # - - - - - - - - - - - - - - - - -
+  TaskRole:
+    Value: !Ref TaskRole
+    Export:
+      Name: !Join
+        - '-'
+        - - ECS
+          - TaskRole
+          - !Ref ProjectName
+
+  # - - - - - - - - - - - - - - - - -
+  TaskRoleArn:
+    Value: !GetAtt TaskRole.Arn
+    Export:
+      Name: !Join
+        - '-'
+        - - ECS
+          - TaskRoleArn
+          - !Ref ProjectName
