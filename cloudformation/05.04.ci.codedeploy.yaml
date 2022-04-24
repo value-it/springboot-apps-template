@@ -26,11 +26,11 @@ Resources:
         DeploymentOption: WITH_TRAFFIC_CONTROL
       BlueGreenDeploymentConfiguration:
         DeploymentReadyOption:
-          ActionOnTimeout: CONTINUE_DEPLOYMENT
-          WaitTimeInMinutes: 0
+          ActionOnTimeout: STOP_DEPLOYMENT
+          WaitTimeInMinutes: 1440
         TerminateBlueInstancesOnDeploymentSuccess:
           Action: TERMINATE
-          TerminationWaitTimeInMinutes: 5
+          TerminationWaitTimeInMinutes: 1440
       DeploymentConfigName: CodeDeployDefault.ECSAllAtOnce
       LoadBalancerInfo:
         TargetGroupPairInfoList:

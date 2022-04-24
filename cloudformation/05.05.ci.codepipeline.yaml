@@ -49,10 +49,10 @@ Resources:
           !Sub CodePipelineRoleArn-${ProjectName}
       Stages:
         -
-          Name: Source
+          Name: SourceStage
           Actions:
             -
-              Name: Source
+              Name: SourcePull
               ActionTypeId:
                 Category: Source
                 Owner: ThirdParty
@@ -70,10 +70,10 @@ Resources:
               RunOrder: 1
 
         -
-          Name: Build
+          Name: BuildStage
           Actions:
             -
-              Name: Build
+              Name: BuildApplication
               InputArtifacts:
                 -
                   Name: SourceArtifact
@@ -95,10 +95,21 @@ Resources:
               RunOrder: 1
 
         -
-          Name: Deploy
+          Name: ApprovalStage
           Actions:
             -
-              Name: DeployStage
+              Name: ApprovalBeforeDeploy
+              ActionTypeId:
+                Category: Approval
+                Owner: AWS
+                Version: 1
+                Provider: Manual
+
+        -
+          Name: DeployStage
+          Actions:
+            -
+              Name: DeployToECS
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS
