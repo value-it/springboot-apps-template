@@ -90,8 +90,12 @@ aws cloudformation deploy \
 ```
 
 
+## 6. デプロイ
+### CodePipelineがデプロイ承認待ち(ApprovalStage)になるのを待つ
+https://ap-northeast-1.console.aws.amazon.com/codesuite/codepipeline/pipelines/bootapps-tmpl-deploy-pipeline/view
 
-## ECSタスク数を1で起動
+### 最小ECSタスク数をパラメータとしてECSサービス定義を更新する
+指定したタスク数でECSタスクが起動する
 ```shell
 aws cloudformation deploy \
 --stack-name springboot-apps-template-ecs-service \
