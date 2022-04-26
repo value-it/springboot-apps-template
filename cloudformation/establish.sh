@@ -1,48 +1,24 @@
-# CloudFormationでSpringBoot雛形アプリをBlue/Greenデプロイする環境を構築する手順
+#!/bin/sh
 
-- AWSリソースの設定値はひとまず動かすことだけにフォーカスしたものなので、そのまま商用環境で利用しないこと
-- AWSにデータベースまで構築すると大掛かりになりすぎるので、サーバー環境ではDB無しで動作するようにアプリを構成
-
-## 事前準備
-
-### AWS SecretsManagerに以下の値を登録
-> 名前： SpringBootAppsTemplate  
-> キー名: GitHubSecretToken  
-> 値： Githubリポジトリへアクセスするための個人用アクセストークン
-
-### AWS SystemsManagerのパラメータストアで以下の値を登録
-> /SPRINGBOOT_APPS_TEMPLATE/DOCKERHUB_USERNAME： DockerHubユーザー名  
-> /SPRINGBOOT_APPS_TEMPLATE/DOCKERHUB_PASSWORD： DockerHubパスワード  
-
-
-```shell
-# AWSアカウントのプロファイルを作業PCに作成して環境変数で指定（プロファイル名は適宜）
-export AWS_PROFILE=hogehoge
-```
-
-## 1. 基本ネットワーク構築
-```shell
+# 1. 基本ネットワーク構築
 aws cloudformation deploy \
 --stack-name springboot-apps-template-network \
 --template-file ./01-create-network.yml
-```
 
-## 2. 基本SecurityGroup作成
-```shell
+
+# 2. 基本SecurityGroup作成
 aws cloudformation deploy \
 --stack-name springboot-apps-template-securitygroup \
 --template-file ./02-securitygroup.yaml 
-```
 
-## 3. ALB作成
-```shell
+
+3. ALB作成
 aws cloudformation deploy \
 --stack-name springboot-apps-template-alb \
 --template-file ./03-alb.yml
-```
 
-## 4. ECS定義作成
-```shell
+
+4. ECS定義作成
 # ECS用Role
 aws cloudformation deploy \
 --stack-name springboot-apps-template-ecs-role \
@@ -59,10 +35,8 @@ aws cloudformation deploy \
 --stack-name springboot-apps-template-ecs-service \
 --template-file ./04.03.ecs.service.yaml \
 --parameter-overrides MinCapacity=2 MaxCapacity=10
-```
 
-## 5. CI/CD定義作成
-```shell
+# 5. CI/CD定義作成
 # Base
 aws cloudformation deploy \
 --stack-name springboot-apps-template-ci-base \
@@ -88,9 +62,3 @@ aws cloudformation deploy \
 aws cloudformation deploy \
 --stack-name springboot-apps-template-ci-codepipeline \
 --template-file ./05.05.ci.codepipeline.yaml
-```
-
-
-## 6. デプロイ
-### CodePipelineでデプロイ承認(ApprovalStage)を行う
-https://ap-northeast-1.console.aws.amazon.com/codesuite/codepipeline/pipelines/bootapps-tmpl-deploy-pipeline/view

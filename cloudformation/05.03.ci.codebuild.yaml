@@ -48,7 +48,7 @@ Resources:
         Type: LINUX_CONTAINER
         # CodeBuild内でdockerビルドできるようにするために特権付与
         PrivilegedMode: True
-        ComputeType: BUILD_GENERAL1_SMALL
+        ComputeType: BUILD_GENERAL1_MEDIUM
         # BUILD_GENERAL1_SMALL  = 2vCPU/RAM3GB
         # BUILD_GENERAL1_MEDIUM = 4vCPU/RAM7GB
         # BUILD_GENERAL1_LARGE  = 8vCPU/RAM15GB
