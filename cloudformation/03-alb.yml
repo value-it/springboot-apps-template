@@ -111,6 +111,8 @@ Resources:
             !Sub ${ProjectName}-network-public1-subnet
         - Fn::ImportValue:
             !Sub ${ProjectName}-network-public2-subnet
+        - Fn::ImportValue:
+            !Sub ${ProjectName}-network-public3-subnet
 
   # - - - - - - - - - - - - - - - - -
   ALBListenerRuleForProd:
