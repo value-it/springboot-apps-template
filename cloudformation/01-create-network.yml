@@ -145,7 +145,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub "${ProjectName}-network-public1-route"
+          Value: !Sub "${ProjectName}-network-public-route"
 
   # Private RouteTable Create
   PrivateRouteTable:
@@ -154,7 +154,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub "${ProjectName}-network-private1-route"
+          Value: !Sub "${ProjectName}-network-private-route"
 
   # ------------------------------------------------------------#
   # Routing
@@ -188,6 +188,11 @@ Resources:
     Properties:
       SubnetId: !Ref Public2Subnet
       RouteTableId: !Ref PublicRouteTable
+  Public3SubnetRouteTableAssociation:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      SubnetId: !Ref Public3Subnet
+      RouteTableId: !Ref PublicRouteTable
 
   Private1SubnetRouteTableAssociation:
     Type: "AWS::EC2::SubnetRouteTableAssociation"
@@ -198,6 +203,11 @@ Resources:
     Type: "AWS::EC2::SubnetRouteTableAssociation"
     Properties:
       SubnetId: !Ref Private2Subnet
+      RouteTableId: !Ref PrivateRouteTable
+  Private3SubnetRouteTableAssociation:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      SubnetId: !Ref Private3Subnet
       RouteTableId: !Ref PrivateRouteTable
 
 # ------------------------------------------------------------#
