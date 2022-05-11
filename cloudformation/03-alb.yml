@@ -88,10 +88,10 @@ Resources:
   InternetALB:
     Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
     Properties:
-      Name: !Sub "${ProjectName}-network-alb"
+      Name: !Sub "${ProjectName}-alb"
       Tags:
         - Key: Name
-          Value: !Sub "${ProjectName}-network-alb"
+          Value: !Sub "${ProjectName}-alb"
       # 内部向けかインターネット向け
       Scheme: "internet-facing"
       # ロードバランサーの属性
@@ -190,7 +190,7 @@ Outputs:
   InternetALB:
     Value: !Ref InternetALB
     Export:
-      Name: !Sub "${ProjectName}-network-alb"
+      Name: !Sub "${ProjectName}-alb"
 
   # ALB Listener
   ALBListenerForProd:

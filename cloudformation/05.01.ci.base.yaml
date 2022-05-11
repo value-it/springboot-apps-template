@@ -9,7 +9,6 @@ Parameters:
     Default: dev
     AllowedValues:
       - dev
-      - stg
       - prd
 
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
@@ -85,7 +84,10 @@ Resources:
             Statement:
               - Action:
                   - s3:PutObject
+                  - s3:PutObjectAcl
                   - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketVersioning
                 Effect: Allow
                 Resource: !Join
                   - '/'
@@ -213,7 +215,10 @@ Resources:
             Statement:
               - Action:
                   - s3:PutObject
+                  - s3:PutObjectAcl
                   - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketVersioning
                 Effect: Allow
                 Resource: !Join
                   - '/'
@@ -238,6 +243,16 @@ Resources:
               - Action:
                   - ssm:GetParameters
                   - ssm:GetParameter
+                Effect: Allow
+                Resource: '*'
+        - PolicyName: UseCodeStarConnections
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - codestar-connections:UseConnection
+                  - codestar-connections:GetConnection
+                  - codestar-connections:ListConnections
                 Effect: Allow
                 Resource: '*'
 

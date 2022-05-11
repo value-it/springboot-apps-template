@@ -1,0 +1,354 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Aurora PostgreSQL'
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: bootapps-tmpl
+
+  Stage:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prd
+
+  DatabaseName:
+    Type: String
+    Default: bootapps_tmpl
+
+  EngineVersion:
+    Type: String
+    Default: 13.5
+
+  MasterUsername:
+    Type: String
+    Default: postgres
+
+  LogMinDurationStatement:
+    Type: String
+    Default: 500
+
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+Mappings:
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+  spec:
+    dev:
+      DBInstanceClass: db.t3.medium
+    prd:
+      DBInstanceClass: db.r5.large
+
+  parameters:
+    dev:
+      AlermThresholdMaxConnection: 300
+      LogMinDurationStatement: 500
+    prd:
+      AlermThresholdMaxConnection: 1200
+      LogMinDurationStatement: 500
+
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+Conditions:
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+  HasReplica: !Equals [!Ref Stage, prd]
+
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+Resources:
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+# - - - - - - - - - - - - - - - - -
+  DBSubnetGroup:
+# - - - - - - - - - - - - - - - - -
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: !Sub ${ProjectName}-db-subnet-group
+      DBSubnetGroupDescription: Private Subnet for Aurora
+      SubnetIds:
+        - Fn::ImportValue:
+            !Sub "${ProjectName}-network-private1-subnet"
+        - Fn::ImportValue:
+            !Sub "${ProjectName}-network-private2-subnet"
+        - Fn::ImportValue:
+            !Sub "${ProjectName}-network-private3-subnet"
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ProjectName
+              - Aurora
+        - Key: Service
+          Value: !Ref ProjectName
+        - Key: Stage
+          Value: !Ref Stage
+
+# - - - - - - - - - - - - - - - - -
+  DBClusterParameterGroup:
+# - - - - - - - - - - - - - - - - -
+    Type: AWS::RDS::DBClusterParameterGroup
+    Properties:
+      Description: !Join
+            - ' '
+            - - !Ref ProjectName
+              - cluster parameter group for postgres13
+      Family: aurora-postgresql13
+      Parameters:
+        client_encoding: UTF8
+        timezone: Asia/Tokyo
+        log_min_duration_statement: !FindInMap [ parameters, !Ref Stage, LogMinDurationStatement ] # 指定したミリ秒以上要したクエリを記録する（0で全てのクエリを記録）
+#        log_destination: csvlog
+        log_duration: 1 # クエリの実行時間を記録する
+        log_error_verbosity: verbose  # エラーログ記録の詳細度合い（TERSE | DEFAULT | VERBOSE）
+
+        shared_preload_libraries: pg_stat_statements
+        pg_stat_statements.max: 2000
+        pg_stat_statements.track: top
+        pg_stat_statements.save: 1
+
+        rds.enable_plan_management: 1
+        apg_plan_mgmt.capture_plan_baselines: automatic
+        apg_plan_mgmt.use_plan_baselines: true
+
+        apg_ccm_enabled: 1
+
+#        work_mem: 4096
+
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ProjectName
+              - DBClusterParameterGroup
+        - Key: Service
+          Value: !Ref ProjectName
+        - Key: Stage
+          Value: !Ref Stage
+
+
+  # - - - - - - - - - - - - - - - - -
+  DBParameterGroup:
+    # - - - - - - - - - - - - - - - - -
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      Description: !Join
+        - ' '
+        - - !Ref ProjectName
+          - parameter group for postgres13
+      Family: aurora-postgresql13
+      Parameters:
+        application_name: !Ref ProjectName
+        log_min_duration_statement: !FindInMap [ parameters, !Ref Stage, LogMinDurationStatement ] # 指定したミリ秒以上要したクエリを記録する（0で全てのクエリを記録）
+        #        log_destination: csvlog
+        log_duration: 1 # クエリの実行時間を記録する
+        log_error_verbosity: verbose  # エラーログ記録の詳細度合い（TERSE | DEFAULT | VERBOSE）
+
+        shared_preload_libraries: pg_stat_statements
+        pg_stat_statements.max: 2000
+        pg_stat_statements.track: top
+        pg_stat_statements.save: 1
+
+        #        work_mem: 4096
+
+        apg_plan_mgmt.capture_plan_baselines: automatic
+        apg_plan_mgmt.use_plan_baselines: true
+
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ProjectName
+              - DBParameterGroup
+        - Key: Service
+          Value: !Ref ProjectName
+        - Key: Stage
+          Value: !Ref Stage
+
+# - - - - - - - - - - - - - - - - -
+  DBCluster:
+# - - - - - - - - - - - - - - - - -
+    Type: AWS::RDS::DBCluster
+    DependsOn:
+        - DBSubnetGroup
+        - DBClusterParameterGroup
+    Properties:
+      AvailabilityZones:
+        - !Select
+          - 0
+          - Fn::GetAZs: !Ref AWS::Region
+        - !Select
+          - 1
+          - Fn::GetAZs: !Ref AWS::Region
+      DBClusterIdentifier: !Join
+        - '-'
+        - - !Ref ProjectName
+          - DBCluster
+      BackupRetentionPeriod: 30
+      DatabaseName: !Ref DatabaseName
+      DBClusterParameterGroupName: !Ref DBClusterParameterGroup
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      Engine: aurora-postgresql
+      EngineVersion: !Ref EngineVersion
+      Port: 5432
+      PreferredBackupWindow: 18:00-19:00
+      PreferredMaintenanceWindow: Tue:17:00-Tue:18:00
+      MasterUsername: !Ref MasterUsername
+      MasterUserPassword: !Sub '{{resolve:secretsmanager:${ProjectName}/aurora/postgresql:SecretString:MasterUserPassword}}'
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ProjectName
+              - dbcluster
+        - Key: Service
+          Value: !Ref ProjectName
+        - Key: Stage
+          Value: !Ref Stage
+      VpcSecurityGroupIds:
+        - Fn::ImportValue:
+            !Sub "${ProjectName}-sg-postgresql"
+
+
+# - - - - - - - - - - - - - - - - -
+  DBInstance:
+# - - - - - - - - - - - - - - - - -
+    Type: AWS::RDS::DBInstance
+    DependsOn:
+        - DBCluster
+        - DBParameterGroup
+    Properties:
+      DBInstanceIdentifier: !Join
+        - '-'
+        - - !Ref ProjectName
+          - dbinstance
+      DBClusterIdentifier: !Ref DBCluster
+      DBParameterGroupName: !Ref DBParameterGroup
+      Engine: aurora-postgresql
+      EngineVersion: !Ref EngineVersion
+      DBInstanceClass: !FindInMap [ spec, !Ref Stage, DBInstanceClass ]
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      MonitoringInterval: 5
+      MonitoringRoleArn: !Join
+            - ':'
+            - - 'arn:aws:iam:'
+              - !Ref AWS::AccountId
+              - role/rds-monitoring-role
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ProjectName
+              - DBInstance
+        - Key: Service
+          Value: !Ref ProjectName
+        - Key: Stage
+          Value: !Ref Stage
+
+# - - - - - - - - - - - - - - - - -
+  ScalableTarget:
+# - - - - - - - - - - - - - - - - -
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Condition: HasReplica
+    DependsOn:
+      - DBCluster
+    Properties:
+      MaxCapacity: 10
+      MinCapacity: 1
+      ResourceId: !Sub "cluster:${DBCluster}"
+      RoleARN: !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-service-role/rds.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_RDSCluster"
+      ScalableDimension: rds:cluster:ReadReplicaCount
+      ServiceNamespace: rds
+
+# - - - - - - - - - - - - - - - - -
+  ScalingPolicy:
+# - - - - - - - - - - - - - - - - -
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Condition: HasReplica
+    DependsOn:
+      - ScalableTarget
+    Properties:
+      ScalingTargetId: !Ref ScalableTarget
+      ServiceNamespace: rds
+      PolicyName: !Join
+                  - '-'
+                  - - !Ref ProjectName
+                    - Aurora
+                    - ScalePolicy
+      PolicyType: TargetTrackingScaling
+      ScalableDimension: rds:cluster:ReadReplicaCount
+      TargetTrackingScalingPolicyConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: RDSReaderAverageCPUUtilization
+        TargetValue: 80.0
+        ScaleOutCooldown: 300
+        ScaleInCooldown: 300
+        DisableScaleIn: false   # スケールインする
+
+# - - - - - - - - - - - - - - - - -
+  CloudWatchRDSCPUUtilization80over:
+# - - - - - - - - - - - - - - - - -
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Join
+                  - ' '
+                  - - "RDS CPU Utilization > 80% for 3 minutes"
+                    - !Ref DBCluster
+      AlarmDescription: !Ref DBCluster
+      ActionsEnabled: true
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 3
+      MetricName: CPUUtilization
+      Namespace: AWS/RDS
+      Period: 60
+      Statistic: Maximum
+      Threshold: "80.0"
+      TreatMissingData: breaching
+      Dimensions:
+        - Name: DBClusterIdentifier
+          Value: !Ref DBCluster
+
+# - - - - - - - - - - - - - - - - -
+  CloudWatchRDSLowFreeableMemoryunder100MB:
+# - - - - - - - - - - - - - - - - -
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Join
+                  - ' '
+                  - - "RDS FreeableMemory < 100MB for 1 minutes"
+                    - !Ref DBCluster
+      AlarmDescription: !Ref DBCluster
+      ActionsEnabled: true
+      ComparisonOperator: LessThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: FreeableMemory
+      Namespace: AWS/RDS
+      Period: 60
+      Statistic: Average
+      Threshold: "104857600.0"
+      TreatMissingData: breaching
+      Dimensions:
+        - Name: DBClusterIdentifier
+          Value: !Ref DBCluster
+
+# - - - - - - - - - - - - - - - - -
+  CloudWatchRDSDatabaseConnections80over:
+# - - - - - - - - - - - - - - - - -
+# max_connections LEAST({DBInstanceClassMemory/9531392},5000)
+# 16GB memory
+# 1024 * 1024 * 1024 * 16 = 17,179,869,184
+# max_connections = 17,179,869,184/9,531,392 = 1802.45122475
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Join
+                  - ' '
+                  - - "RDS Database Connections > 1441(1802 * 80%) for 1 minutes"
+                    - !Ref DBCluster
+      AlarmDescription: !Ref DBCluster
+      ActionsEnabled: true
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: DatabaseConnections
+      Namespace: AWS/RDS
+      Period: 60
+      Statistic: Maximum
+      Threshold: !FindInMap [ parameters, !Ref Stage, AlermThresholdMaxConnection ]
+      TreatMissingData: breaching
+      Dimensions:
+        - Name: DBClusterIdentifier
+          Value: !Ref DBCluster

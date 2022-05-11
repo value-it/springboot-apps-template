@@ -10,7 +10,6 @@ Parameters:
     Default: dev
     AllowedValues:
       - dev
-      - stg
       - prd
 
   GithubOrganization:
@@ -26,6 +25,20 @@ Parameters:
     Default: webapp-example
 
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+Mappings:
+  # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+  spec:
+    dev:
+      ComputeType: BUILD_GENERAL1_MEDIUM
+
+    prod:
+      ComputeType: BUILD_GENERAL1_MEDIUM
+
+    # BUILD_GENERAL1_SMALL  = 2vCPU/RAM3GB
+    # BUILD_GENERAL1_MEDIUM = 4vCPU/RAM7GB
+    # BUILD_GENERAL1_LARGE  = 8vCPU/RAM15GB
+
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 Resources:
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
   # - - - - - - - - - - - - - - - - -
@@ -34,7 +47,7 @@ Resources:
     Type: AWS::CodeBuild::Project
     Properties:
       Artifacts:
-        Type: NO_ARTIFACTS
+        Type: CODEPIPELINE
       BadgeEnabled: false
       Description: !Sub "build ${ProjectName} application"
       Name: !Join
@@ -48,10 +61,8 @@ Resources:
         Type: LINUX_CONTAINER
         # CodeBuild内でdockerビルドできるようにするために特権付与
         PrivilegedMode: True
-        ComputeType: BUILD_GENERAL1_MEDIUM
-        # BUILD_GENERAL1_SMALL  = 2vCPU/RAM3GB
-        # BUILD_GENERAL1_MEDIUM = 4vCPU/RAM7GB
-        # BUILD_GENERAL1_LARGE  = 8vCPU/RAM15GB
+        ComputeType: !FindInMap [ spec, !Ref Stage, ComputeType ]
+
         Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
         EnvironmentVariables:
           # ======================
@@ -65,20 +76,10 @@ Resources:
             Type: PLAINTEXT
 
       Source:
-        GitCloneDepth: 1
-        Location:
-          !Join
-          - ''
-          - - 'https://github.com/'
-            - !Ref GithubOrganization
-            - '/'
-            - !Ref GithubRepository
-            - '.git'
-        Type: GITHUB
-        Auth:
-          Type: OAUTH
+        Type: CODEPIPELINE
         BuildSpec: !Sub "${ApplicationName}/buildspec.yml"
-      TimeoutInMinutes: 60
+
+      TimeoutInMinutes: 30
 
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 Outputs:

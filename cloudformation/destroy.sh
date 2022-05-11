@@ -20,7 +20,6 @@ aws ecr delete-repository --repository-name bootapps-tmpl/application --force
 # CI CodePipeline
 echo "delete-stack springboot-apps-template-ci-codepipeline"
 aws cloudformation delete-stack --stack-name springboot-apps-template-ci-codepipeline
-sleep 10
 aws cloudformation wait stack-delete-complete --stack-name springboot-apps-template-ci-codepipeline
 
 # CI CodeDeploy
@@ -29,13 +28,11 @@ aws cloudformation delete-stack --stack-name springboot-apps-template-ci-codedep
 # CI CodeBuild
 echo "delete-stack springboot-apps-template-ci-codebuild"
 aws cloudformation delete-stack --stack-name springboot-apps-template-ci-codebuild
-sleep 10
 aws cloudformation wait stack-delete-complete --stack-name springboot-apps-template-ci-codebuild
 
 # CI ECR
 echo "delete-stack springboot-apps-template-ci-ecr"
 aws cloudformation delete-stack --stack-name springboot-apps-template-ci-ecr
-sleep 10
 aws cloudformation wait stack-delete-complete --stack-name springboot-apps-template-ci-ecr
 
 # CI Base
@@ -45,13 +42,11 @@ aws cloudformation delete-stack --stack-name springboot-apps-template-ci-base
 # ECSサービス
 echo "delete-stack springboot-apps-template-ecs-service"
 aws cloudformation delete-stack --stack-name springboot-apps-template-ecs-service
-sleep 10
 aws cloudformation wait stack-delete-complete --stack-name springboot-apps-template-ecs-service
 
 # ECSタスク定義
 echo "delete-stack springboot-apps-template-ecs-task"
 aws cloudformation delete-stack --stack-name springboot-apps-template-ecs-task
-sleep 10
 aws cloudformation wait stack-delete-complete --stack-name springboot-apps-template-ecs-task
 
 # ECS用Role
@@ -61,13 +56,11 @@ aws cloudformation delete-stack --stack-name springboot-apps-template-ecs-role
 # ALB
 echo "delete-stack springboot-apps-template-alb"
 aws cloudformation delete-stack --stack-name springboot-apps-template-alb
-sleep 10
 aws cloudformation wait stack-delete-complete --stack-name springboot-apps-template-alb
 
 # 基本SecurityGroup
 echo "delete-stack springboot-apps-template-securitygroup"
 aws cloudformation delete-stack --stack-name springboot-apps-template-securitygroup
-sleep 10
 aws cloudformation wait stack-delete-complete --stack-name springboot-apps-template-securitygroup
 
 # 基本ネットワーク

@@ -10,7 +10,6 @@ Parameters:
     Default: dev
     AllowedValues:
       - dev
-      - stg
       - prd
 
   GithubOrganization:
@@ -21,9 +20,18 @@ Parameters:
     Type: String
     Default: springboot-apps-template
 
-  GithubBranch:
+  CodeStarConnectionArn:
     Type: String
-    Default: master
+
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+Mappings:
+  # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+  source:
+    dev:
+      branch: master
+    prod:
+      branch: master
+
 
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 Resources:
@@ -55,18 +63,17 @@ Resources:
               Name: SourcePull
               ActionTypeId:
                 Category: Source
-                Owner: ThirdParty
+                Owner: AWS
                 Version: 1
-                Provider: GitHub
+                Provider: CodeStarSourceConnection
               OutputArtifacts:
                 -
                   Name: SourceArtifact
               Configuration:
-                Branch: !Ref GithubBranch
-                Owner: !Ref GithubOrganization
-                PollForSourceChanges: false
-                Repo: !Ref GithubRepository
-                OAuthToken: '{{resolve:secretsmanager:SpringBootAppsTemplate:SecretString:GitHubSecretToken}}'
+                FullRepositoryId: !Sub "${GithubOrganization}/${GithubRepository}"
+                ConnectionArn: !Ref CodeStarConnectionArn
+                BranchName: !FindInMap [ source, !Ref Stage, branch ]
+                DetectChanges: "false"
               RunOrder: 1
 
         -

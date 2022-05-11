@@ -33,8 +33,7 @@ aws cloudformation deploy \
 # ECSサービス
 aws cloudformation deploy \
 --stack-name springboot-apps-template-ecs-service \
---template-file ./04.03.ecs.service.yaml \
---parameter-overrides MinCapacity=2 MaxCapacity=10
+--template-file ./04.03.ecs.service.yaml
 
 # 5. CI/CD定義作成
 # Base

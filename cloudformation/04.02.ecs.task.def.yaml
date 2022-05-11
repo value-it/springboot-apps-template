@@ -14,7 +14,6 @@ Parameters:
     Default: dev
     AllowedValues:
       - dev
-      - stg
       - prd
 
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
@@ -22,6 +21,10 @@ Mappings:
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
   spec:
     dev:
+      CPU: 1024
+      Memory: 2GB
+
+    prod:
       CPU: 1024
       Memory: 2GB
 
@@ -48,7 +51,7 @@ Resources:
                 Fn::ImportValue:
                   !Sub ECS-LogGroup-${ProjectName}
               awslogs-region: !Ref AWS::Region
-              awslogs-stream-prefix: !Ref Stage
+              awslogs-stream-prefix: task
           # MemoryReservation: 2048
           PortMappings:
             -

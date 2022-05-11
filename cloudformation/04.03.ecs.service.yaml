@@ -9,13 +9,24 @@ Parameters:
     Type: String
     Default: base
 
-  MinCapacity:
+  Stage:
     Type: String
-    Default: 0
+    Default: dev
+    AllowedValues:
+      - dev
+      - prd
 
-  MaxCapacity:
-    Type: String
-    Default: 10
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+Mappings:
+  # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+  scaling:
+    dev:
+      MinCapacity: 2
+      MaxCapacity: 5
+
+    prod:
+      MinCapacity: 2
+      MaxCapacity: 10
 
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 Resources:
@@ -84,8 +95,8 @@ Resources:
     DependsOn:
       - ECSService
     Properties:
-      MaxCapacity: !Ref MaxCapacity
-      MinCapacity: !Ref MinCapacity
+      MaxCapacity: !FindInMap [ scaling, !Ref Stage, MaxCapacity ]
+      MinCapacity: !FindInMap [ scaling, !Ref Stage, MinCapacity ]
       ResourceId: !Join
           - /
           - - service

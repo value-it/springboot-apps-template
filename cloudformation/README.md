@@ -1,47 +1,66 @@
-# CloudFormationでSpringBoot雛形アプリをBlue/Greenデプロイする環境を構築する手順
+# CloudFormationでSpringBoot雛形アプリをECSにBlue/Greenデプロイする環境を構築する手順
 
 - AWSリソースの設定値はひとまず動かすことだけにフォーカスしたものなので、そのまま商用環境で利用しないこと
-- AWSにデータベースまで構築すると大掛かりになりすぎるので、サーバー環境ではDB無しで動作するようにアプリを構成
+- Auroraデータベースは構築しなくてもアプリが動作するようになっているため必要に応じて構築する
+
+## 構成図
+![構成図](assets/CI構成図.png "環境一覧")
 
 ## 事前準備
 
-### AWS SecretsManagerに以下の値を登録
-> 名前： SpringBootAppsTemplate  
-> キー名: GitHubSecretToken  
-> 値： Githubリポジトリへアクセスするための個人用アクセストークン
+### AWS Codestar Connectionsの接続作成
+GitHubからソースコードを取得するための接続を以下より作成  
+https://ap-northeast-1.console.aws.amazon.com/codesuite/settings/connections/create?origin=settings&region=ap-northeast-1
 
 ### AWS SystemsManagerのパラメータストアで以下の値を登録
-> /SPRINGBOOT_APPS_TEMPLATE/DOCKERHUB_USERNAME： DockerHubユーザー名  
-> /SPRINGBOOT_APPS_TEMPLATE/DOCKERHUB_PASSWORD： DockerHubパスワード  
+https://ap-northeast-1.console.aws.amazon.com/systems-manager/parameters/?region=ap-northeast-1  
+予めDockerHubのユーザー登録を済ませておく必要あり
+
+| 名前                                  | タイプ | データ型 | 値                |
+|-------------------------------------|-----|------|------------------|
+| /SPRINGBOOT_APPS_TEMPLATE/DOCKERHUB_USERNAME | 文字列 | text | (DockerHubユーザー名) |
+| /SPRINGBOOT_APPS_TEMPLATE/DOCKERHUB_PASSWORD | 文字列 | text | (DockerHubパスワード) |
 
 
+### 作業用端末にAWS CLI v2をインストール
+https://aws.amazon.com/jp/cli/
+
+### AWS CLI の名前付きプロファイルを作成
+各種リソースを操作可能なIAMユーザーのプロファイルを作成する  
+https://docs.aws.amazon.com/ja_jp/cli/latest/userguide/cli-configure-profiles.html
+
+---
+
+## 手順
+
+### 0. 環境変数設定
+事前に作成したAWSプロファイルを指定（プロファイル名は適宜修正）
 ```shell
-# AWSアカウントのプロファイルを作業PCに作成して環境変数で指定（プロファイル名は適宜）
 export AWS_PROFILE=hogehoge
 ```
 
-## 1. 基本ネットワーク構築
+### 1. 基本ネットワーク構築
 ```shell
 aws cloudformation deploy \
 --stack-name springboot-apps-template-network \
 --template-file ./01-create-network.yml
 ```
 
-## 2. 基本SecurityGroup作成
+### 2. 基本SecurityGroup作成
 ```shell
 aws cloudformation deploy \
 --stack-name springboot-apps-template-securitygroup \
 --template-file ./02-securitygroup.yaml 
 ```
 
-## 3. ALB作成
+### 3. ALB作成
 ```shell
 aws cloudformation deploy \
 --stack-name springboot-apps-template-alb \
 --template-file ./03-alb.yml
 ```
 
-## 4. ECS定義作成
+### 4. ECS定義作成
 ```shell
 # ECS用Role
 aws cloudformation deploy \
@@ -61,7 +80,7 @@ aws cloudformation deploy \
 --parameter-overrides MinCapacity=2 MaxCapacity=10
 ```
 
-## 5. CI/CD定義作成
+### 5. CI/CD定義作成
 ```shell
 # Base
 aws cloudformation deploy \
@@ -91,6 +110,22 @@ aws cloudformation deploy \
 ```
 
 
-## 6. デプロイ
-### CodePipelineでデプロイ承認(ApprovalStage)を行う
-https://ap-northeast-1.console.aws.amazon.com/codesuite/codepipeline/pipelines/bootapps-tmpl-deploy-pipeline/view
+---
+
+### パイプライン実行
+https://ap-northeast-1.console.aws.amazon.com/codesuite/codepipeline/pipelines?region=ap-northeast-1
+1. `変更をリリースする` ボタンでpipeline開始
+2. `ApprovalStage` で承認操作を行う
+3. [CodeDeploy](https://ap-northeast-1.console.aws.amazon.com/codesuite/codedeploy/deployments?region=ap-northeast-1) でBlue/Greenのトラフィック移行
+
+
+---
+
+### Aurora PostgreSQL作成
+作成しなくてもサンプルアプリは動く
+```shell
+aws cloudformation deploy \
+--stack-name springboot-apps-template-aurora \
+--template-file ./06.01.aurora.yaml
+```
+
