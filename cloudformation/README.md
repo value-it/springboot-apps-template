@@ -39,6 +39,12 @@ https://docs.aws.amazon.com/ja_jp/cli/latest/userguide/cli-configure-profiles.ht
 export AWS_PROFILE=hogehoge
 ```
 
+前手順で作成したAWS Codestar ConnectionsのARNを指定
+```shell
+# ex) CODESTART_CONNECTION_ARN=arn:aws:codestar-connections:ap-northeast-1:xxxxxxxx:connection/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx
+export CODESTAR_CONNECTION_ARN=
+```
+
 ### 1. 基本ネットワーク構築
 ```shell
 aws cloudformation deploy \
@@ -106,7 +112,8 @@ aws cloudformation deploy \
 # CodePipeline
 aws cloudformation deploy \
 --stack-name springboot-apps-template-ci-codepipeline \
---template-file ./05.05.ci.codepipeline.yaml
+--template-file ./05.05.ci.codepipeline.yaml \
+--parameter-overrides CodeStarConnectionArn=$CODESTAR_CONNECTION_ARN
 ```
 
 

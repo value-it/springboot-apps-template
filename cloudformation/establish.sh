@@ -1,5 +1,11 @@
 #!/bin/sh
 
+if [ -z $CODESTAR_CONNECTION_ARN ]; then
+  echo 'Please set the "CODESTAR_CONNECTION_ARN" environment variable.' >&2
+  exit 1
+fi
+
+
 # 1. 基本ネットワーク構築
 aws cloudformation deploy \
 --stack-name springboot-apps-template-network \
@@ -60,4 +66,5 @@ aws cloudformation deploy \
 # CodePipeline
 aws cloudformation deploy \
 --stack-name springboot-apps-template-ci-codepipeline \
---template-file ./05.05.ci.codepipeline.yaml
+--template-file ./05.05.ci.codepipeline.yaml \
+--parameter-overrides CodeStarConnectionArn=$CODESTAR_CONNECTION_ARN
