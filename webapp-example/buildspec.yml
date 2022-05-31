@@ -38,7 +38,7 @@ phases:
   post_build:
     commands:
       - docker image push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPOSITORY_NAME:latest
-      - docker image push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPOSITORY_NAME:$IMAGE_TAG
+#      - docker image push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPOSITORY_NAME:$IMAGE_TAG
       - cp appspec.yaml $DEFAULT/
       - cp ./codesuite/${ENV,,}/taskdef.json $DEFAULT/
       - cd $DEFAULT
