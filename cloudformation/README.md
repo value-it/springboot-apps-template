@@ -125,6 +125,12 @@ https://ap-northeast-1.console.aws.amazon.com/codesuite/codepipeline/pipelines?r
 2. `ApprovalStage` で承認操作を行う
 3. [CodeDeploy](https://ap-northeast-1.console.aws.amazon.com/codesuite/codedeploy/deployments?region=ap-northeast-1) でBlue/Greenのトラフィック移行
 
+####
+以下のエラーによりECSのデプロイが出来ない場合はEC2インスタンスをスペック等何でも良いので1台起動する
+
+`You've reached the limit on the number of tasks you can run concurrently.`
+
+[参考情報](https://repost.aws/questions/QUiWCpad5jReKxxTiWjKfeyA/how-to-solve-the-ecs-error-youve-reached-the-limit-on-the-number-of-tasks-you-can-run-concurrently)
 
 ---
 
