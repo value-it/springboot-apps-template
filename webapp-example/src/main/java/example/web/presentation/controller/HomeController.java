@@ -1,7 +1,7 @@
 package example.web.presentation.controller;
 
 import example.web.application.example.ExampleService;
-import example.web.infrastructure.model.example.Example;
+import example.web.domain.model.example.Example;
 import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

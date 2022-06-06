@@ -1,7 +1,7 @@
 package example.web.application.example;
 
 import example.web.domain.model.example.ExampleRepository;
-import example.web.infrastructure.model.example.Example;
+import example.web.domain.model.example.Example;
 import org.springframework.stereotype.Service;
 
 @Service

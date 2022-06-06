@@ -1,4 +1,4 @@
-package example.web.infrastructure.model.example;
+package example.web.domain.model.example;
 
 public class Example {
 

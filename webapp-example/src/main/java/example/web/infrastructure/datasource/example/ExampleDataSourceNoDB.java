@@ -1,7 +1,7 @@
 package example.web.infrastructure.datasource.example;
 
 import example.web.domain.model.example.ExampleRepository;
-import example.web.infrastructure.model.example.Example;
+import example.web.domain.model.example.Example;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
