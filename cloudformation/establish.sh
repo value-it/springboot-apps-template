@@ -5,26 +5,28 @@ if [ -z $CODESTAR_CONNECTION_ARN ]; then
   exit 1
 fi
 
+CURRENT_DIR=$(cd $(dirname $0); pwd)
+cd $CURRENT_DIR
 
-# 1. 基本ネットワーク構築
+# 基本ネットワーク構築
 aws cloudformation deploy \
 --stack-name springboot-apps-template-network \
 --template-file ./01-create-network.yml
 
 
-# 2. 基本SecurityGroup作成
+# 基本SecurityGroup作成
 aws cloudformation deploy \
 --stack-name springboot-apps-template-securitygroup \
 --template-file ./02-securitygroup.yaml 
 
 
-3. ALB作成
+# ALB作成
 aws cloudformation deploy \
 --stack-name springboot-apps-template-alb \
 --template-file ./03-alb.yml
 
 
-4. ECS定義作成
+# ECS定義作成
 # ECS用Role
 aws cloudformation deploy \
 --stack-name springboot-apps-template-ecs-role \
