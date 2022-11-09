@@ -24,6 +24,8 @@ public class HomeController {
 
         model.addAttribute("hoge", hoge);
 
+        model.addAttribute("ENV_TEST", System.getenv("ENV_TEST"));
+
         return "index";
     }
 
