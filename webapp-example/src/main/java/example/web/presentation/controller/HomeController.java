@@ -25,8 +25,8 @@ public class HomeController {
         model.addAttribute("hoge", hoge);
 
         model.addAttribute("ENV_TEST", System.getenv("ENV_TEST"));
-        model.addAttribute("ENV_TEST_DEFAULT", System.getenv("ENV_TEST-default"));
-        model.addAttribute("ENV_TEST_V2", System.getenv("ENV_TEST-v2"));
+        model.addAttribute("ENV_TEST_DEFAULT", System.getenv("ENV_TEST_default"));
+        model.addAttribute("ENV_TEST_V2", System.getenv("ENV_TEST_v2"));
 
         return "index";
     }
