@@ -20,7 +20,7 @@
         },
         {
           "name": "ENV_TEST_default",
-          "valueFrom": "arn:aws:ssm:ap-northeast-1:<AWS_ACCOUNT_ID>:parameter/ENV_TEST:v2"
+          "valueFrom": "arn:aws:ssm:ap-northeast-1:<AWS_ACCOUNT_ID>:parameter/ENV_TEST:default"
         },
         {
           "name": "ENV_TEST_v2",
