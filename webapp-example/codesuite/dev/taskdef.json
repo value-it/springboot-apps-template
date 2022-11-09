@@ -13,6 +13,20 @@
           "awslogs-stream-prefix": "dev"
         }
       },
+      "secrets": [
+        {
+          "name": "ENV_TEST",
+          "valueFrom": "arn:aws:ssm:ap-northeast-1:<AWS_ACCOUNT_ID>:parameter/ENV_TEST"
+        },
+        {
+          "name": "ENV_TEST-default",
+          "valueFrom": "arn:aws:ssm:ap-northeast-1:<AWS_ACCOUNT_ID>:parameter/ENV_TEST:v2"
+        },
+        {
+          "name": "ENV_TEST-v2",
+          "valueFrom": "arn:aws:ssm:ap-northeast-1:<AWS_ACCOUNT_ID>:parameter/ENV_TEST:v2"
+        }
+      ],
       "portMappings": [
         {
           "hostPort": 38080,
