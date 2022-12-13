@@ -33,7 +33,7 @@
         <td th:text="${record.id}"></td>
         <td th:text="${record.title.value}"></td>
         <td th:text="${record.isbn.value}"></td>
-        <td th:text="${record.pages}"></td>
+        <td th:text="${record.pages.value}"></td>
         <td><a th:href="@{/bookcatalog/editor(id=${record.id})}">編集</a></td>
       </form>
     </tr>

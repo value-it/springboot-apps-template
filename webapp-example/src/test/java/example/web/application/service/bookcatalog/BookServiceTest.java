@@ -7,6 +7,7 @@ import static org.hamcrest.core.Is.is;
 import example.web.domain.model.bookcatalog.Book;
 import example.web.domain.model.bookcatalog.BookList;
 import example.web.domain.model.bookcatalog.Isbn;
+import example.web.domain.model.bookcatalog.Pages;
 import example.web.domain.model.bookcatalog.Title;
 import example.web.domain.model.bookcatalog.form.BookEditForm;
 import example.web.domain.model.bookcatalog.form.BookRegisterForm;
@@ -41,8 +42,8 @@ class BookServiceTest {
     BookList sut = bookFindService.findAll();
     String actual = sut.toString();
     String expected = "BookList[list=["
-        + "Book[id=1, title=Title[value=エンジェルタロット], isbn=Isbn[value=9784866540689], pages=64], "
-        + "Book[id=2, title=Title[value=誰でもできる！Google for Education導入ガイド], isbn=Isbn[value=9784296070534], pages=344]"
+        + "Book[id=1, title=Title[value=エンジェルタロット], isbn=Isbn[value=9784866540689], pages=Pages[value=64]], "
+        + "Book[id=2, title=Title[value=誰でもできる！Google for Education導入ガイド], isbn=Isbn[value=9784296070534], pages=Pages[value=344]]"
         + "]]";
     assertThat(actual, is(expected));
   }
@@ -52,12 +53,12 @@ class BookServiceTest {
   @Sql("classpath:db/migration/phase001/999_data/R__001_init.sql")
   public void 書籍を新規登録() {
     BookRegisterForm form =
-        new BookRegisterForm("ドラゴンボール1巻", "1234567890123", 50);
+        new BookRegisterForm(new Title("ドラゴンボール1巻"), new Isbn("1234567890123"), new Pages("50"));
 
     bookRegisterService.saveAsNew(form);
 
     Book actual = bookFindService.findById(3L);
-    Book expected = new Book(3L, new Title("ドラゴンボール1巻"), new Isbn("1234567890123"), 50);
+    Book expected = new Book(3L, new Title("ドラゴンボール1巻"), new Isbn("1234567890123"), new Pages("50"));
     assertThat(actual, is(expected));
   }
 
@@ -66,12 +67,12 @@ class BookServiceTest {
   @Sql("classpath:db/migration/phase001/999_data/R__001_init.sql")
   public void 書籍を更新() {
     BookEditForm form =
-        new BookEditForm(1L, "エンジェルタロット-編集済み", "9784866540680", 128);
+        new BookEditForm(1L, new Title("エンジェルタロット-編集済み"), new Isbn("9784866540680"), new Pages("128"));
 
     bookUpdateService.update(form);
 
     Book actual = bookFindService.findById(1L);
-    Book expected = new Book(1L, new Title("エンジェルタロット-編集済み"), new Isbn("9784866540680"), 128);
+    Book expected = new Book(1L, new Title("エンジェルタロット-編集済み"), new Isbn("9784866540680"), new Pages("128"));
     assertThat(actual, is(expected));
   }
 }

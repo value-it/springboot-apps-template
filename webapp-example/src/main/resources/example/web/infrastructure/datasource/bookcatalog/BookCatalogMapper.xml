@@ -7,7 +7,7 @@
       <idArg name="id" column="id" javaType="Long"/>
       <arg name="title" resultMap="Title"/>
       <arg name="isbn" resultMap="Isbn"/>
-      <arg name="pages" column="pages" javaType="Integer"/>
+      <arg name="pages" resultMap="Pages"/>
     </constructor>
   </resultMap>
 
@@ -20,6 +20,12 @@
   <resultMap id="Isbn" type="example.web.domain.model.bookcatalog.Isbn">
     <constructor>
       <arg name="value" column="isbn" javaType="String"/>
+    </constructor>
+  </resultMap>
+
+  <resultMap id="Pages" type="example.web.domain.model.bookcatalog.Pages">
+    <constructor>
+      <arg name="value" column="pages" javaType="String"/>
     </constructor>
   </resultMap>
 
@@ -50,14 +56,14 @@
     VALUES (#{id},
             #{title.value},
             #{isbn.value},
-            #{pages})
+            #{pages.value})
   </insert>
 
   <update id="update">
     UPDATE bookcatalog.books
     SET title = #{title.value},
         isbn  = #{isbn.value},
-        pages = #{pages}
+        pages = #{pages.value}
     WHERE id = #{id}
   </update>
 </mapper>
