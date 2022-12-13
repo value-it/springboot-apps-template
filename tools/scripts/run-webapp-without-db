@@ -4,4 +4,4 @@ CURRENT_DIR=$(cd $(dirname $0); pwd)
 
 cd $CURRENT_DIR/../../
 
-./gradlew webapp-example:bootRun --args='--spring.profiles.active=without_db'
+./gradlew webapp-example:bootRun

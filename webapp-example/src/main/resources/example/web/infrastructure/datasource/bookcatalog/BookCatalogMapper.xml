@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="example.web.infrastructure.datasource.bookcatalog.BookCatalogMapper">
+  <resultMap id="Book" type="example.web.domain.model.bookcatalog.Book">
+    <constructor>
+      <idArg name="id" column="id" javaType="Long"/>
+      <arg name="title" resultMap="Title"/>
+      <arg name="isbn" resultMap="Isbn"/>
+      <arg name="pages" column="pages" javaType="Integer"/>
+    </constructor>
+  </resultMap>
+
+  <resultMap id="Title" type="example.web.domain.model.bookcatalog.Title">
+    <constructor>
+      <arg name="value" column="title" javaType="String"/>
+    </constructor>
+  </resultMap>
+
+  <resultMap id="Isbn" type="example.web.domain.model.bookcatalog.Isbn">
+    <constructor>
+      <arg name="value" column="isbn" javaType="String"/>
+    </constructor>
+  </resultMap>
+
+  <select id="findAll" resultMap="Book">
+    SELECT id
+         , title
+         , isbn
+         , pages
+    FROM bookcatalog.books
+    ORDER BY id
+  </select>
+
+  <select id="findById" resultMap="Book">
+    SELECT id
+         , title
+         , isbn
+         , pages
+    FROM bookcatalog.books
+    WHERE id = #{id}
+  </select>
+
+  <select id="nextId" resultType="Long">
+    SELECT nextval('seq_book_id')
+  </select>
+
+  <insert id="saveAsNew">
+    INSERT INTO bookcatalog.books(id, title, isbn, pages)
+    VALUES (#{id},
+            #{title.value},
+            #{isbn.value},
+            #{pages})
+  </insert>
+
+  <update id="update">
+    UPDATE bookcatalog.books
+    SET title = #{title.value},
+        isbn  = #{isbn.value},
+        pages = #{pages}
+    WHERE id = #{id}
+  </update>
+</mapper>

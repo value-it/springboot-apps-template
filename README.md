@@ -1,50 +1,25 @@
 # SpringBootアプリ雛形
 
-- dockerで起動したPostgreSQLから値を取得して表示するだけのサンプルプログラム
+## 概要
+- 簡単な書籍データベース
+- ローカル用データベースはh2dbを使用（起動の都度初期化）
+- DDDを意識した設計
+- クラスは全てイミュータブル
+- ValueObjectはレコードクラスで実装
+- ECSへのデプロイ時はデフォルトではDB無効
+
+## 前提
 
 ### 要Java17
 https://aws.amazon.com/jp/corretto/
 
-## 起動手順
+## サンプルWEBアプリ起動手順
 
-### dockerでローカルDB(PostgreSQL)起動
-```shell
-./tools/scripts/run-postgresql
-```
-
-### ローカルDBマイグレーション実行（Flyway）
-```shell
-./tools/scripts/flyway-migrate
-
-# 初期化してマイグレーションする場合は
-./tools/scripts/flyway-clean-and-migrate
-```
-
-### サンプルWEBアプリ起動
+### 起動コマンド
 ```shell
 ./tools/scripts/run-webapp
 ```
 
-### DB接続無しでサンプルWEBアプリ起動
-```shell
-./tools/scripts/run-webapp-without-db
-```
-
----
-### サンプルWEBアプリURL
+### URL
 > http://localhost:38080/
-
-
----
-
-
-## （参考）dockerローカルDB接続情報
-> DB名: example_db  
-> Port: 55432
->
-> SuperUser: postgres    
-> UperUserPassword: postgres
->
-> AppUser: example-user  
-> AppUser Password: weak-password
 

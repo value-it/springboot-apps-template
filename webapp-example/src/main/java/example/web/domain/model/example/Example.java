@@ -1,17 +1,5 @@
 package example.web.domain.model.example;
 
-public class Example {
+public record Example(String id) {
 
-    private String id;
-
-    public Example() {
-    }
-
-    public Example(String id) {
-        this.id = id;
-    }
-
-    public String getId() {
-        return id;
-    }
 }

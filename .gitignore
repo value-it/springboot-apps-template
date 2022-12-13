@@ -22,3 +22,6 @@ build
 
 # fakesmtp
 tools/received-emails/
+
+database.mv.db
+database.trace.db

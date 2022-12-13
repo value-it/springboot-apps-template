@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>書籍新規登録</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <style type="text/css">
+      <!--
+      .error-msg {
+          color: red;
+      }
+      -->
+  </style>
+</head>
+<body>
+<h1>書籍新規登録</h1>
+
+<div id="registerForm">
+
+  <form method="POST" th:object="${bookRegisterForm}">
+    <p>
+      書籍名：<input type="text" th:field="*{title}"/>
+      <p class="error-msg" th:errors="*{title}">エラーメッセージ</p>
+    </p>
+    <p>
+      ISBN：<input type="text" th:field="*{isbn}"/>
+      <p class="error-msg" th:errors="*{isbn}">エラーメッセージ</p>
+    </p>
+    <p>
+      ページ数：<input type="text" th:field="*{pages}"/>
+      <p class="error-msg" th:errors="*{pages}">エラーメッセージ</p>
+    </p>
+    <p><input type="submit" value="登録"/></p>
+  </form>
+
+</div>
+
+<div id="navi" style="margin-top:30px;">
+  <a th:href="@{/bookcatalog/list}">戻る</a>
+</div>
+
+</body>
+</html>
