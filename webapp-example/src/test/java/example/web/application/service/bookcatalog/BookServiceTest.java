@@ -35,8 +35,8 @@ class BookServiceTest {
   }
 
   @Test
-  @Sql("classpath:init-schema.sql")
-  @Sql("classpath:init-data.sql")
+  @Sql("classpath:db/migration/phase001/001_schema/V000_001_001__bookcatalog.sql")
+  @Sql("classpath:db/migration/phase001/999_data/R__001_init.sql")
   public void 書籍リスト全件取得() {
     BookList sut = bookFindService.findAll();
     String actual = sut.toString();
@@ -48,8 +48,8 @@ class BookServiceTest {
   }
 
   @Test
-  @Sql("classpath:init-schema.sql")
-  @Sql("classpath:init-data.sql")
+  @Sql("classpath:db/migration/phase001/001_schema/V000_001_001__bookcatalog.sql")
+  @Sql("classpath:db/migration/phase001/999_data/R__001_init.sql")
   public void 書籍を新規登録() {
     BookRegisterForm form =
         new BookRegisterForm("ドラゴンボール1巻", "1234567890123", 50);
@@ -62,8 +62,8 @@ class BookServiceTest {
   }
 
   @Test
-  @Sql("classpath:init-schema.sql")
-  @Sql("classpath:init-data.sql")
+  @Sql("classpath:db/migration/phase001/001_schema/V000_001_001__bookcatalog.sql")
+  @Sql("classpath:db/migration/phase001/999_data/R__001_init.sql")
   public void 書籍を更新() {
     BookEditForm form =
         new BookEditForm(1L, "エンジェルタロット-編集済み", "9784866540680", 128);
