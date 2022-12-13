@@ -1,4 +1,4 @@
-package example.web.presentation.controller.bookcatalog;
+package example.web.presentation.controller.bookcatalog.booklist;
 
 import example.web.application.service.bookcatalog.BookFindService;
 import example.web.domain.model.bookcatalog.BookList;

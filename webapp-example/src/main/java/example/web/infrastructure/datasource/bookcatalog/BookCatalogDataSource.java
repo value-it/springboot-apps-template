@@ -2,7 +2,7 @@ package example.web.infrastructure.datasource.bookcatalog;
 
 import example.web.domain.model.bookcatalog.Book;
 import example.web.domain.model.bookcatalog.BookList;
-import example.web.domain.model.bookcatalog.BookCatalogRepository;
+import example.web.domain.model.bookcatalog.repository.BookCatalogRepository;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
 

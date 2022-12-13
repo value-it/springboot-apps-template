@@ -2,7 +2,7 @@ package example.web.application.service.bookcatalog;
 
 import example.web.domain.model.bookcatalog.Book;
 import example.web.domain.model.bookcatalog.BookList;
-import example.web.domain.model.bookcatalog.BookCatalogRepository;
+import example.web.domain.model.bookcatalog.repository.BookCatalogRepository;
 import org.springframework.stereotype.Service;
 
 @Service

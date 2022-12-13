@@ -1,4 +1,4 @@
-package example.web.domain.model.bookcatalog.form;
+package example.web.presentation.controller.bookcatalog.bookeditor;
 
 import example.web.domain.model.bookcatalog.Book;
 import example.web.domain.model.bookcatalog.Isbn;

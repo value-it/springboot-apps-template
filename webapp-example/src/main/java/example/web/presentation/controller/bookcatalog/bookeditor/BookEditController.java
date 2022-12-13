@@ -1,7 +1,7 @@
-package example.web.presentation.controller.bookcatalog;
+package example.web.presentation.controller.bookcatalog.bookeditor;
 
+import example.web.application.service.bookcatalog.BookFindService;
 import example.web.application.service.bookcatalog.BookUpdateService;
-import example.web.domain.model.bookcatalog.form.BookEditForm;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -13,29 +13,31 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/bookcatalog/editor")
-public class BookEditorController {
+public class BookEditController {
 
   private final BookUpdateService bookUpdateService;
 
-  public BookEditorController(BookUpdateService bookUpdateService) {
+  private final BookFindService bookFindService;
+
+  public BookEditController(BookUpdateService bookUpdateService,
+      BookFindService bookFindService) {
     this.bookUpdateService = bookUpdateService;
+    this.bookFindService = bookFindService;
   }
 
   @GetMapping
   String index(@RequestParam("id") Long id, Model model) {
-    model.addAttribute("bookEditForm", bookUpdateService.initializeBookEditForm(id));
+    model.addAttribute("bookEditForm", BookEditForm.fromDomainEntity(bookFindService.findById(id)));
     return "bookcatalog/editor";
   }
 
   @PostMapping
-  String update(@Validated BookEditForm bookEditForm,
-      BindingResult result, Model model) {
+  String update(@Validated BookEditForm bookEditForm, BindingResult result) {
 
-    if (!result.hasErrors()) {
-      bookUpdateService.update(bookEditForm);
-      return "redirect:/bookcatalog/list";
+    if (result.hasErrors()) {
+      return "bookcatalog/editor";
     }
-//    model.addAttribute("bookEditForm", bookEditForm);
-    return "bookcatalog/editor";
+    bookUpdateService.update(bookEditForm.toDomainEntity());
+    return "redirect:/bookcatalog/list";
   }
 }

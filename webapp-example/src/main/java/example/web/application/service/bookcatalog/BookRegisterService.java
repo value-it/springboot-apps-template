@@ -1,7 +1,7 @@
 package example.web.application.service.bookcatalog;
 
-import example.web.domain.model.bookcatalog.BookCatalogRepository;
-import example.web.domain.model.bookcatalog.form.BookRegisterForm;
+import example.web.domain.model.bookcatalog.Book;
+import example.web.domain.model.bookcatalog.repository.BookCatalogRepository;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,8 +13,11 @@ public class BookRegisterService {
     this.bookCatalogRepository = bookCatalogRepository;
   }
 
-  public void saveAsNew(BookRegisterForm bookRegisterForm) {
-    bookCatalogRepository.saveAsNew(
-        bookRegisterForm.toDomainEntity(bookCatalogRepository.nextId()));
+  public void saveAsNew(Book book) {
+    bookCatalogRepository.saveAsNew(book);
+  }
+
+  public Long nextId() {
+    return bookCatalogRepository.nextId();
   }
 }

@@ -1,7 +1,7 @@
-package example.web.presentation.controller.bookcatalog;
+package example.web.presentation.controller.bookcatalog.bookregister;
 
 import example.web.application.service.bookcatalog.BookRegisterService;
-import example.web.domain.model.bookcatalog.form.BookRegisterForm;
+import example.web.domain.model.bookcatalog.Book;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -27,13 +27,13 @@ public class BookRegisterController {
   }
 
   @PostMapping
-  String save(@Validated BookRegisterForm bookRegisterForm,
-      BindingResult result) {
+  String save(@Validated BookRegisterForm bookRegisterForm, BindingResult result) {
 
-    if (!result.hasErrors()) {
-      bookRegisterService.saveAsNew(bookRegisterForm);
-      return "redirect:/bookcatalog/list";
+    if (result.hasErrors()) {
+      return "bookcatalog/register";
     }
-    return "bookcatalog/register";
+    Book book = bookRegisterForm.toDomainEntity(bookRegisterService.nextId());
+    bookRegisterService.saveAsNew(book);
+    return "redirect:/bookcatalog/list";
   }
 }

@@ -1,5 +1,7 @@
-package example.web.domain.model.bookcatalog;
+package example.web.domain.model.bookcatalog.repository;
 
+import example.web.domain.model.bookcatalog.Book;
+import example.web.domain.model.bookcatalog.BookList;
 import java.util.Optional;
 
 public interface BookCatalogRepository {

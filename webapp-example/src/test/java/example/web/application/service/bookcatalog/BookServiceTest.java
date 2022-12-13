@@ -9,8 +9,8 @@ import example.web.domain.model.bookcatalog.BookList;
 import example.web.domain.model.bookcatalog.Isbn;
 import example.web.domain.model.bookcatalog.Pages;
 import example.web.domain.model.bookcatalog.Title;
-import example.web.domain.model.bookcatalog.form.BookEditForm;
-import example.web.domain.model.bookcatalog.form.BookRegisterForm;
+import example.web.presentation.controller.bookcatalog.bookeditor.BookEditForm;
+import example.web.presentation.controller.bookcatalog.bookregister.BookRegisterForm;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,10 +55,12 @@ class BookServiceTest {
     BookRegisterForm form =
         new BookRegisterForm(new Title("ドラゴンボール1巻"), new Isbn("1234567890123"), new Pages("50"));
 
-    bookRegisterService.saveAsNew(form);
+    Book sut = form.toDomainEntity(bookRegisterService.nextId());
+    bookRegisterService.saveAsNew(sut);
 
     Book actual = bookFindService.findById(3L);
-    Book expected = new Book(3L, new Title("ドラゴンボール1巻"), new Isbn("1234567890123"), new Pages("50"));
+    Book expected =
+        new Book(3L, new Title("ドラゴンボール1巻"), new Isbn("1234567890123"), new Pages("50"));
     assertThat(actual, is(expected));
   }
 
@@ -67,12 +69,14 @@ class BookServiceTest {
   @Sql("classpath:db/migration/phase001/999_data/R__001_init.sql")
   public void 書籍を更新() {
     BookEditForm form =
-        new BookEditForm(1L, new Title("エンジェルタロット-編集済み"), new Isbn("9784866540680"), new Pages("128"));
+        new BookEditForm(1L, new Title("エンジェルタロット-編集済み"), new Isbn("9784866540680"),
+            new Pages("128"));
 
-    bookUpdateService.update(form);
+    bookUpdateService.update(form.toDomainEntity());
 
     Book actual = bookFindService.findById(1L);
-    Book expected = new Book(1L, new Title("エンジェルタロット-編集済み"), new Isbn("9784866540680"), new Pages("128"));
+    Book expected =
+        new Book(1L, new Title("エンジェルタロット-編集済み"), new Isbn("9784866540680"), new Pages("128"));
     assertThat(actual, is(expected));
   }
 }
