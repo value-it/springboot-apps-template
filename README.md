@@ -6,6 +6,8 @@
 - DDDを意識した設計
 - クラスは全てイミュータブル
 - ValueObjectはレコードクラスで実装
+- AWS(ECS)にデプロイ可能（CloudFormation添付）
+  - [手順参照](./cloudformation/README.md)
 - ECSへのデプロイ時はデフォルトではDB無効
 
 ## 前提
