@@ -1,6 +1,5 @@
 package example.web.presentation.controller;
 
-import example.web.domain.model.example.Example;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Controller;
@@ -18,9 +17,6 @@ public class HomeController {
   String index(Model model) {
 
     log.info("index");
-
-    Example hoge = new Example("test");
-    model.addAttribute("hoge", hoge);
 
     model.addAttribute("ENV_TEST", System.getenv("ENV_TEST"));
     model.addAttribute("ENV_TEST_DEFAULT", System.getenv("ENV_TEST_default"));
