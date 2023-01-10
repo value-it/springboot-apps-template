@@ -26,6 +26,6 @@ public record BookEditForm(
   }
 
   public Book toDomainEntity() {
-    return new Book(this.id, this.title(), this.isbn, this.pages);
+    return new Book(this.id, this.title, this.isbn, this.pages);
   }
 }
