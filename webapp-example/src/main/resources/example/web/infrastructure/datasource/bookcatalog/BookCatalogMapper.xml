@@ -90,11 +90,11 @@
                 #{pages.value})
     </insert>
 
-    <insert id="deleteRevisionLatest">
+    <delete id="deleteRevisionLatest">
         DELETE
         FROM bookcatalog.books_revision_latest
         WHERE book_id = #{bookId.value}
-    </insert>
+    </delete>
 
     <insert id="insertRevisionLatest">
         INSERT INTO bookcatalog.books_revision_latest(book_id, revision)
