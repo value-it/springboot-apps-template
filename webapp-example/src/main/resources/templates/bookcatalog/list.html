@@ -1,47 +1,49 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>書籍カタログ</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-  <style type="text/css">
-      <!--
-      table {
-          text-align: left;
-      }
-      th,td {
-          border-style:solid;
-          border-width: 1px;
-      }
-      -->
-  </style>
+    <title>書籍カタログ</title>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <style type="text/css">
+        <!--
+        table {
+            text-align: left;
+        }
+
+        th, td {
+            border-style: solid;
+            border-width: 1px;
+        }
+
+        -->
+    </style>
 </head>
 <body>
 <h1>書籍一覧</h1>
 
 <div id="itemList">
 
-  <table style="text-align: left;">
-    <tr>
-      <th>ID</th>
-      <th>書籍名</th>
-      <th>ISBN</th>
-      <th>ページ数</th>
-      <th></th>
-    </tr>
-    <tr th:each="record,stat: *{bookList.list}">
-      <form method="POST" action="?">
-        <td th:text="${record.id}"></td>
-        <td th:text="${record.title.value}"></td>
-        <td th:text="${record.isbn.value}"></td>
-        <td th:text="${record.pages.value}"></td>
-        <td><a th:href="@{/bookcatalog/editor(id=${record.id})}">編集</a></td>
-      </form>
-    </tr>
-  </table>
+    <table style="text-align: left;">
+        <tr>
+            <th>ID</th>
+            <th>書籍名</th>
+            <th>ISBN</th>
+            <th>ページ数</th>
+            <th></th>
+        </tr>
+        <tr th:each="record,stat: *{bookList.list}">
+            <form action="?" method="POST">
+                <td th:text="${record.bookId.value}"></td>
+                <td th:text="${record.title.value}"></td>
+                <td th:text="${record.isbn.value}"></td>
+                <td th:text="${record.pages.value}"></td>
+                <td><a th:href="@{/bookcatalog/editor(id=${record.bookId.value})}">編集</a></td>
+            </form>
+        </tr>
+    </table>
 </div>
 
 <div id="navi" style="margin-top:30px;">
-  <a th:href="@{/bookcatalog/register}">新規登録</a>
+    <a th:href="@{/bookcatalog/register}">新規登録</a>
 </div>
 
 </body>

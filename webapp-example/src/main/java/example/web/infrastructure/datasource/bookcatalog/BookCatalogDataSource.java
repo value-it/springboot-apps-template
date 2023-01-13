@@ -1,42 +1,57 @@
 package example.web.infrastructure.datasource.bookcatalog;
 
-import example.web.domain.model.bookcatalog.Book;
-import example.web.domain.model.bookcatalog.BookList;
+import example.web.domain.model.bookcatalog.*;
 import example.web.domain.model.bookcatalog.repository.BookCatalogRepository;
-import java.util.Optional;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 @Repository
 public class BookCatalogDataSource implements BookCatalogRepository {
 
-  @Override
-  public BookList findAll() {
-    return new BookList(mapper.findAll());
-  }
+    private final BookCatalogMapper mapper;
 
-  @Override
-  public void saveAsNew(Book book) {
-    mapper.saveAsNew(book);
-  }
+    public BookCatalogDataSource(BookCatalogMapper mapper) {
+        this.mapper = mapper;
+    }
 
-  @Override
-  public Optional<Book> findById(Long id) {
-    return mapper.findById(id);
-  }
+    @Override
+    public BookList findAll() {
+        return new BookList(mapper.findAll());
+    }
 
-  @Override
-  public void update(Book book) {
-    mapper.update(book);
-  }
+    @Override
+    public void saveAsNew(Book book) {
+        mapper.insertBook(book);
+        mapper.insertRevision(book);
+        mapper.deleteRevisionLatest(book);
+        mapper.insertRevisionLatest(book);
+    }
 
-  @Override
-  public Long nextId() {
-    return mapper.nextId();
-  }
+    @Override
+    public Optional<Book> findById(BookId bookId) {
+        return mapper.findById(bookId);
+    }
 
-  private final BookCatalogMapper mapper;
+    @Override
+    public void update(Book book) {
+        mapper.insertRevision(book);
+        mapper.deleteRevisionLatest(book);
+        mapper.insertRevisionLatest(book);
+    }
 
-  public BookCatalogDataSource(BookCatalogMapper mapper) {
-    this.mapper = mapper;
-  }
+    @Override
+    public BookId nextId() {
+        return mapper.nextId();
+    }
+
+    @Override
+    public BookRevision nextRevision() {
+        return mapper.nextRevision();
+    }
+
+    @Override
+    public Optional<Book> findByName(Title title) {
+        return mapper.findByName(title);
+    }
 }

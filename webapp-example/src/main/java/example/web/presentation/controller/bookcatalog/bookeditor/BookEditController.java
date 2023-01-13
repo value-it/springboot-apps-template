@@ -1,7 +1,7 @@
 package example.web.presentation.controller.bookcatalog.bookeditor;
 
-import example.web.application.service.bookcatalog.BookFindService;
 import example.web.application.service.bookcatalog.BookUpdateService;
+import example.web.domain.model.bookcatalog.service.BookConsistencyService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,29 +15,31 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/bookcatalog/editor")
 public class BookEditController {
 
-  private final BookUpdateService bookUpdateService;
+    private final BookUpdateService bookUpdateService;
+    private final BookConsistencyService bookConsistencyService;
 
-  private final BookFindService bookFindService;
-
-  public BookEditController(BookUpdateService bookUpdateService,
-      BookFindService bookFindService) {
-    this.bookUpdateService = bookUpdateService;
-    this.bookFindService = bookFindService;
-  }
-
-  @GetMapping
-  String index(@RequestParam("id") Long id, Model model) {
-    model.addAttribute("bookEditForm", BookEditForm.fromDomainEntity(bookFindService.findById(id)));
-    return "bookcatalog/editor";
-  }
-
-  @PostMapping
-  String update(@Validated BookEditForm bookEditForm, BindingResult result) {
-
-    if (result.hasErrors()) {
-      return "bookcatalog/editor";
+    public BookEditController(BookUpdateService bookUpdateService, BookConsistencyService bookConsistencyService) {
+        this.bookUpdateService = bookUpdateService;
+        this.bookConsistencyService = bookConsistencyService;
     }
-    bookUpdateService.update(bookEditForm.toDomainEntity());
-    return "redirect:/bookcatalog/list";
-  }
+
+    @GetMapping
+    String index(@RequestParam("id") Long id, Model model) {
+        model.addAttribute("bookEditForm", bookUpdateService.createBookEditForm(id));
+        return "bookcatalog/editor";
+    }
+
+    @PostMapping
+    String update(@Validated BookEditForm bookEditForm, BindingResult result) {
+
+        if (result.hasErrors()) {
+            return "bookcatalog/editor";
+        }
+        if (bookConsistencyService.isTitleExists(bookEditForm.title(), bookEditForm.bookId())) {
+            result.rejectValue("title.value", "validation.book.title.duplicated");
+            return "bookcatalog/editor";
+        }
+        bookUpdateService.update(bookEditForm);
+        return "redirect:/bookcatalog/list";
+    }
 }

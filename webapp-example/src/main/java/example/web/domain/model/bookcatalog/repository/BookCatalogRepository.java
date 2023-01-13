@@ -1,18 +1,22 @@
 package example.web.domain.model.bookcatalog.repository;
 
-import example.web.domain.model.bookcatalog.Book;
-import example.web.domain.model.bookcatalog.BookList;
+import example.web.domain.model.bookcatalog.*;
+
 import java.util.Optional;
 
 public interface BookCatalogRepository {
 
-  BookList findAll();
+    BookList findAll();
 
-  void saveAsNew(Book book);
+    void saveAsNew(Book book);
 
-  Optional<Book> findById(Long id);
+    Optional<Book> findById(BookId bookId);
 
-  void update(Book book);
+    void update(Book book);
 
-  Long nextId();
+    BookId nextId();
+
+    BookRevision nextRevision();
+
+    Optional<Book> findByName(Title title);
 }

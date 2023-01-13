@@ -12,19 +12,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/bookcatalog/list")
 public class BookListController {
 
-  private final BookFindService bookFindService;
+    private final BookFindService bookFindService;
 
-  public BookListController(BookFindService bookFindService) {
-    this.bookFindService = bookFindService;
-  }
+    public BookListController(BookFindService bookFindService) {
+        this.bookFindService = bookFindService;
+    }
 
-  @GetMapping
-  String index() {
-    return "bookcatalog/list";
-  }
+    @GetMapping
+    String index() {
+        return "bookcatalog/list";
+    }
 
-  @ModelAttribute
-  private BookList addAttributes(Model model) {
-    return bookFindService.findAll();
-  }
+    @ModelAttribute
+    private BookList addAttributes(Model model) {
+        return bookFindService.findAll();
+    }
 }

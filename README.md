@@ -2,13 +2,15 @@
 
 ## 概要
 - 簡単な書籍データベース
-- ローカル用データベースはh2dbを使用（起動の都度初期化）
-- DDDを意識した設計
-- クラスは全てイミュータブル
-- ValueObjectはレコードクラスで実装
+- データベースはデフォルトではh2dbを使用（起動の都度初期化）
+- DockerでPostgreSQLでも起動可能
+- DDDを意識したパッケージ構造
+- 全てのクラスがイミュータブル
+- テーブル設計もイミュータブル
+- モデルはは可能な限りレコードクラスで実装
 - AWS(ECS)にデプロイ可能（CloudFormation添付）
   - [手順参照](./cloudformation/README.md)
-- ECSへのデプロイ時はデフォルトではDB無効
+
 
 ## 前提
 
@@ -17,11 +19,23 @@ https://aws.amazon.com/jp/corretto/
 
 ## サンプルWEBアプリ起動手順
 
-### 起動コマンド
+### アプリ起動コマンド
 ```shell
 ./tools/scripts/run-webapp
 ```
 
-### URL
-> http://localhost:38080/
+## PostgreSQLで動かす場合
+（要docker）
+### DB起動
+```shell
+./tools/scripts/run-postgresql
+```
 
+### アプリ起動コマンド
+```shell
+./tools/scripts/run-webapp-with-postgresql
+```
+
+
+## URL
+> http://localhost:38080/

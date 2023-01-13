@@ -11,17 +11,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/")
 public class HomeController {
 
-  Log log = LogFactory.getLog(HomeController.class);
+    Log log = LogFactory.getLog(HomeController.class);
 
-  @GetMapping
-  String index(Model model) {
+    @GetMapping
+    String index(Model model) {
 
-    log.info("index");
+        log.info("index");
 
-    model.addAttribute("ENV_TEST", System.getenv("ENV_TEST"));
-    model.addAttribute("ENV_TEST_DEFAULT", System.getenv("ENV_TEST_default"));
-    model.addAttribute("ENV_TEST_V2", System.getenv("ENV_TEST_v2"));
+        model.addAttribute("ENV_TEST", System.getenv("ENV_TEST"));
+        model.addAttribute("ENV_TEST_DEFAULT", System.getenv("ENV_TEST_default"));
 
-    return "index";
-  }
+        return "index";
+    }
 }

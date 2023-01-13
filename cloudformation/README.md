@@ -134,7 +134,7 @@ https://ap-northeast-1.console.aws.amazon.com/codesuite/codepipeline/pipelines?r
 
 ---
 
-### Aurora PostgreSQL作成
+### （オプション）Aurora PostgreSQL作成
 作成しなくてもサンプルアプリは動く
 ```shell
 aws cloudformation deploy \

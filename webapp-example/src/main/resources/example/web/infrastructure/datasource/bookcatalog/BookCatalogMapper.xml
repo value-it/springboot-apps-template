@@ -1,69 +1,104 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="example.web.infrastructure.datasource.bookcatalog.BookCatalogMapper">
-  <resultMap id="Book" type="example.web.domain.model.bookcatalog.Book">
-    <constructor>
-      <idArg name="id" column="id" javaType="Long"/>
-      <arg name="title" resultMap="Title"/>
-      <arg name="isbn" resultMap="Isbn"/>
-      <arg name="pages" resultMap="Pages"/>
-    </constructor>
-  </resultMap>
+    <resultMap id="Book" type="example.web.domain.model.bookcatalog.Book">
+        <constructor>
+            <idArg name="bookId" resultMap="BookId"/>
+            <arg name="revision" resultMap="Revision"/>
+            <arg name="title" resultMap="Title"/>
+            <arg name="isbn" resultMap="Isbn"/>
+            <arg name="pages" resultMap="Pages"/>
+        </constructor>
+    </resultMap>
 
-  <resultMap id="Title" type="example.web.domain.model.bookcatalog.Title">
-    <constructor>
-      <arg name="value" column="title" javaType="String"/>
-    </constructor>
-  </resultMap>
+    <resultMap id="BookId" type="example.web.domain.model.bookcatalog.BookId">
+        <constructor>
+            <arg name="value" column="id" javaType="Long"/>
+        </constructor>
+    </resultMap>
 
-  <resultMap id="Isbn" type="example.web.domain.model.bookcatalog.Isbn">
-    <constructor>
-      <arg name="value" column="isbn" javaType="String"/>
-    </constructor>
-  </resultMap>
+    <resultMap id="Revision" type="example.web.domain.model.bookcatalog.BookRevision">
+        <constructor>
+            <arg name="value" column="revision" javaType="Long"/>
+        </constructor>
+    </resultMap>
 
-  <resultMap id="Pages" type="example.web.domain.model.bookcatalog.Pages">
-    <constructor>
-      <arg name="value" column="pages" javaType="String"/>
-    </constructor>
-  </resultMap>
+    <resultMap id="Title" type="example.web.domain.model.bookcatalog.Title">
+        <constructor>
+            <arg name="value" column="title" javaType="String"/>
+        </constructor>
+    </resultMap>
 
-  <select id="findAll" resultMap="Book">
-    SELECT id
-         , title
-         , isbn
-         , pages
-    FROM bookcatalog.books
-    ORDER BY id
-  </select>
+    <resultMap id="Isbn" type="example.web.domain.model.bookcatalog.Isbn">
+        <constructor>
+            <arg name="value" column="isbn" javaType="String"/>
+        </constructor>
+    </resultMap>
 
-  <select id="findById" resultMap="Book">
-    SELECT id
-         , title
-         , isbn
-         , pages
-    FROM bookcatalog.books
-    WHERE id = #{id}
-  </select>
+    <resultMap id="Pages" type="example.web.domain.model.bookcatalog.Pages">
+        <constructor>
+            <arg name="value" column="pages" javaType="Integer"/>
+        </constructor>
+    </resultMap>
 
-  <select id="nextId" resultType="Long">
-    SELECT nextval('seq_book_id')
-  </select>
+    <sql id="selectBase">
+        SELECT books.id
+             , books_revision.revision
+             , title
+             , isbn
+             , pages
+        FROM bookcatalog.books
+                 INNER JOIN bookcatalog.books_revision_latest ON books_revision_latest.book_id = books.id
+                 INNER JOIN bookcatalog.books_revision ON books_revision.revision = books_revision_latest.revision
+    </sql>
 
-  <insert id="saveAsNew">
-    INSERT INTO bookcatalog.books(id, title, isbn, pages)
-    VALUES (#{id},
-            #{title.value},
-            #{isbn.value},
-            #{pages.value})
-  </insert>
+    <select id="findAll" resultMap="Book">
+        <include refid="selectBase"/>
+        ORDER BY id
+    </select>
 
-  <update id="update">
-    UPDATE bookcatalog.books
-    SET title = #{title.value},
-        isbn  = #{isbn.value},
-        pages = #{pages.value}
-    WHERE id = #{id}
-  </update>
+    <select id="findById" resultMap="Book">
+        <include refid="selectBase"/>
+        WHERE id = #{value}
+    </select>
+
+    <select id="findByName" resultMap="Book">
+        <include refid="selectBase"/>
+        WHERE title = #{value}
+    </select>
+
+    <select id="nextId" resultMap="BookId">
+        SELECT nextval('bookcatalog.seq_book_id') AS id
+    </select>
+
+    <select id="nextRevision" resultMap="Revision">
+        SELECT nextval('bookcatalog.seq_book_revision') AS revision
+    </select>
+
+    <insert id="insertBook">
+        INSERT INTO bookcatalog.books(id)
+        VALUES (#{bookId.value})
+    </insert>
+
+    <insert id="insertRevision">
+        INSERT INTO bookcatalog.books_revision(revision, book_id, title, isbn, pages)
+        VALUES (#{revision.value},
+                #{bookId.value},
+                #{title.value},
+                #{isbn.value},
+                #{pages.value})
+    </insert>
+
+    <insert id="deleteRevisionLatest">
+        DELETE
+        FROM bookcatalog.books_revision_latest
+        WHERE book_id = #{bookId.value}
+    </insert>
+
+    <insert id="insertRevisionLatest">
+        INSERT INTO bookcatalog.books_revision_latest(book_id, revision)
+        VALUES (#{bookId.value},
+                #{revision.value})
+    </insert>
 </mapper>
