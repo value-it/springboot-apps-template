@@ -24,7 +24,7 @@ https://aws.amazon.com/jp/corretto/
 ./tools/scripts/run-webapp
 ```
 
-## PostgreSQLで動かす場合
+## （オプション）PostgreSQLで動かす場合
 （要docker）
 ### DB起動
 ```shell
