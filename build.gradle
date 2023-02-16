@@ -2,7 +2,7 @@ buildscript {
     ext {
         encoding = 'UTF-8'
         javaCompatibility = 17
-        springBootVersion = '2.6.14'
+        springBootVersion = '2.7.8'
         flywayVersion = '9.14.1'
         postgresqlJdbcVersion = '42.5.3'
     }
