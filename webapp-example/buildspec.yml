@@ -3,25 +3,18 @@ version: 0.2
 env:
   variables:
     DOCKER_BUILDKIT: "1"
-  parameter-store:
-    DOCKERHUB_USERNAME: /CI/DOCKERHUB_USERNAME
-    DOCKERHUB_PASSWORD: /CI/DOCKERHUB_PASSWORD
 
 phases:
+  install:
+    runtime-versions:
+      java: corretto17
   pre_build:
     commands:
       - DEFAULT=`pwd`
-      - echo install corretto17
-      - yum install -y https://corretto.aws/downloads/latest/amazon-corretto-17-x64-linux-jdk.rpm
-      - ln -fs /usr/lib/jvm/java-17-amazon-corretto/bin/java /usr/bin/java
-      - export JAVA_HOME="/usr/lib/jvm/java-17-amazon-corretto"
+      - echo `java --version`
 
       - echo login ECR
       - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
-
-      ## TODO DockerHubを利用しない
-      - echo login Docker Hub
-      - echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
 
       - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)

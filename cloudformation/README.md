@@ -12,16 +12,6 @@
 GitHubからソースコードを取得するための接続を以下より作成  
 https://ap-northeast-1.console.aws.amazon.com/codesuite/settings/connections/create?origin=settings&region=ap-northeast-1
 
-### AWS SystemsManagerのパラメータストアで以下の値を登録
-https://ap-northeast-1.console.aws.amazon.com/systems-manager/parameters/?region=ap-northeast-1  
-予めDockerHubのユーザー登録を済ませておく必要あり
-
-| 名前                     | タイプ | データ型 | 値                |
-|------------------------|-----|------|------------------|
-| /CI/DOCKERHUB_USERNAME | 文字列 | text | (DockerHubユーザー名) |
-| /CI/DOCKERHUB_PASSWORD | 文字列 | text | (DockerHubパスワード) |
-
-
 ### 作業用端末にAWS CLI v2をインストール
 https://aws.amazon.com/jp/cli/
 
@@ -42,7 +32,7 @@ export AWS_PROFILE=hogehoge
 前手順で作成したAWS Codestar ConnectionsのARNを指定
 ```shell
 # ex) CODESTART_CONNECTION_ARN=arn:aws:codestar-connections:ap-northeast-1:xxxxxxxx:connection/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx
-export CODESTAR_CONNECTION_ARN=
+export CODESTAR_CONNECTION_ARN=arn:aws:codestar-connections:ap-northeast-1:871365446733:connection/b013b346-3814-4352-9a57-c175869183f5
 ```
 
 ### 1. 基本ネットワーク構築
