@@ -3,6 +3,9 @@ version: 0.2
 env:
   variables:
     DOCKER_BUILDKIT: "1"
+  parameter-store:
+    DOCKERHUB_USERNAME: /CI/DOCKERHUB_USERNAME
+    DOCKERHUB_PASSWORD: /CI/DOCKERHUB_PASSWORD
 
 phases:
   install:
@@ -12,6 +15,9 @@ phases:
     commands:
       - DEFAULT=`pwd`
       - echo `java --version`
+
+      - echo login Docker Hub
+      - echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
 
       - echo login ECR
       - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
