@@ -12,6 +12,16 @@
 GitHubからソースコードを取得するための接続を以下より作成  
 https://ap-northeast-1.console.aws.amazon.com/codesuite/settings/connections/create?origin=settings&region=ap-northeast-1
 
+### AWS SystemsManagerのパラメータストアで以下の値を登録
+https://ap-northeast-1.console.aws.amazon.com/systems-manager/parameters/?region=ap-northeast-1  
+予めDockerHubのユーザー登録を済ませておく必要あり
+
+| 名前                     | タイプ | データ型 | 値                |
+|------------------------|-----|------|------------------|
+| /CI/DOCKERHUB_USERNAME | 文字列 | text | (DockerHubユーザー名) |
+| /CI/DOCKERHUB_PASSWORD | 文字列 | text | (DockerHubパスワード) |
+
+
 ### 作業用端末にAWS CLI v2をインストール
 https://aws.amazon.com/jp/cli/
 
