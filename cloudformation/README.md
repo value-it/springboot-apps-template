@@ -32,7 +32,7 @@ export AWS_PROFILE=hogehoge
 前手順で作成したAWS Codestar ConnectionsのARNを指定
 ```shell
 # ex) CODESTART_CONNECTION_ARN=arn:aws:codestar-connections:ap-northeast-1:xxxxxxxx:connection/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx
-export CODESTAR_CONNECTION_ARN=arn:aws:codestar-connections:ap-northeast-1:871365446733:connection/b013b346-3814-4352-9a57-c175869183f5
+export CODESTAR_CONNECTION_ARN=
 ```
 
 ### 1. 基本ネットワーク構築
