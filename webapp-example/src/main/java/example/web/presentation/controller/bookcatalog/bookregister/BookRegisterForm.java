@@ -3,7 +3,6 @@ package example.web.presentation.controller.bookcatalog.bookregister;
 import example.web.domain.model.bookcatalog.*;
 
 import javax.validation.Valid;
-import java.beans.ConstructorProperties;
 import java.util.Objects;
 
 public final class BookRegisterForm {
@@ -14,7 +13,6 @@ public final class BookRegisterForm {
     @Valid
     private final Pages pages;
 
-    @ConstructorProperties({"title.value", "isbn.value", "pages.value"})
     public BookRegisterForm(
             String title,
             String isbn,

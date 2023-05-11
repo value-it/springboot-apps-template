@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
 <head>
     <title>書籍カタログ</title>
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
-    <style type="text/css">
-        <!--
+    <style>
         table {
             text-align: left;
         }
@@ -13,8 +12,6 @@
             border-style: solid;
             border-width: 1px;
         }
-
-        -->
     </style>
 </head>
 <body>
@@ -31,13 +28,11 @@
             <th></th>
         </tr>
         <tr th:each="record,stat: *{bookList.list}">
-            <form action="?" method="POST">
-                <td th:text="${record.bookId.value}"></td>
-                <td th:text="${record.title.value}"></td>
-                <td th:text="${record.isbn.value}"></td>
-                <td th:text="${record.pages.value}"></td>
-                <td><a th:href="@{/bookcatalog/editor(id=${record.bookId.value})}">編集</a></td>
-            </form>
+            <td th:text="${record.bookId.value}"></td>
+            <td th:text="${record.title.value}"></td>
+            <td th:text="${record.isbn.value}"></td>
+            <td th:text="${record.pages.value}"></td>
+            <td><a th:href="@{/bookcatalog/editor(id=${record.bookId.value})}">編集</a></td>
         </tr>
     </table>
 </div>

@@ -1,15 +1,12 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
 <head>
     <title>書籍新規登録</title>
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
-    <style type="text/css">
-        <!--
+    <style>
         .error-msg {
             color: red;
         }
-
-        -->
     </style>
 </head>
 <body>
@@ -18,19 +15,24 @@
 <div id="registerForm">
 
     <form method="POST" th:object="${bookRegisterForm}">
-        <p>
-            書籍名：<input th:field="*{title.value}" type="text"/>
-        <p class="error-msg" th:errors="*{title.value}">エラーメッセージ</p>
-        </p>
-        <p>
-            ISBN：<input th:field="*{isbn.value}" type="text"/>
-        <p class="error-msg" th:errors="*{isbn.value}">エラーメッセージ</p>
-        </p>
-        <p>
-            ページ数：<input th:field="*{pages.value}" type="number"/>
-        <p class="error-msg" th:errors="*{pages.value}">エラーメッセージ</p>
-        </p>
-        <p><input type="submit" value="登録"/></p>
+        <div>
+            <label for="title">書籍名：</label>
+            <input id="title" name="title" th:value="*{title.value}" type="text"/>
+            <p class="error-msg" th:errors="*{title.value}">エラーメッセージ</p>
+        </div>
+        <div>
+            <label for="isbn">ISBN：</label>
+            <input id="isbn" name="isbn" th:value="*{isbn.value}" type="text"/>
+            <p class="error-msg" th:errors="*{isbn.value}">エラーメッセージ</p>
+        </div>
+        <div>
+            <label for="pages">ページ数：</label>
+            <input id="pages" name="pages" th:value="*{pages.value}" type="number"/>
+            <p class="error-msg" th:errors="*{pages.value}">エラーメッセージ</p>
+        </div>
+        <div>
+            <input type="submit" value="登録"/>
+        </div>
     </form>
 
 </div>

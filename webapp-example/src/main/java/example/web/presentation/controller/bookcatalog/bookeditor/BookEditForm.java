@@ -3,7 +3,6 @@ package example.web.presentation.controller.bookcatalog.bookeditor;
 import example.web.domain.model.bookcatalog.*;
 
 import javax.validation.Valid;
-import java.beans.ConstructorProperties;
 import java.util.Objects;
 
 public final class BookEditForm {
@@ -16,14 +15,13 @@ public final class BookEditForm {
     @Valid
     private final Pages pages;
 
-    @ConstructorProperties({"id", "title.value", "isbn.value", "pages.value"})
     public BookEditForm(
-            Long bookId,
+            Long id,
             String title,
             String isbn,
             Integer pages
     ) {
-        this.bookId = new BookId(bookId);
+        this.bookId = new BookId(id);
         this.title = new Title(title);
         this.isbn = new Isbn(isbn);
         this.pages = new Pages(pages);
