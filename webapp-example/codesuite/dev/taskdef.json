@@ -1,5 +1,5 @@
 {
-  "taskRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/bootapps-tmpl-ECS-ExecRole",
+  "taskRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/bootapps-tmpl-ECS-TaskRole",
   "executionRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/bootapps-tmpl-ECS-ExecRole",
   "containerDefinitions": [
     {
