@@ -4,4 +4,6 @@ CURRENT_DIR=$(cd $(dirname $0); pwd)
 
 cd $CURRENT_DIR/../../
 
+export FLYWAY_CLEAN_DISABLED=false
+
 ./gradlew flywayClean
