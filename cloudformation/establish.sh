@@ -11,7 +11,7 @@ cd $CURRENT_DIR
 # 基本ネットワーク構築
 aws cloudformation deploy \
 --stack-name springboot-apps-template-network \
---template-file ./01-create-network.yml
+--template-file ./01-create-network.yaml
 
 
 # 基本SecurityGroup作成
@@ -23,15 +23,26 @@ aws cloudformation deploy \
 # ALB作成
 aws cloudformation deploy \
 --stack-name springboot-apps-template-alb \
---template-file ./03-alb.yml
+--template-file ./03-alb.yaml
 
 
 # ECS定義作成
 # ECS用Role
+# 既存のServiceLinkedRoleが存在するか確認
+aws iam get-role --role-name "AWSServiceRoleForECS" > /dev/null 2>&1
+# 存在する場合はServiceLinkedRoleを作成しない
+if [ $? -eq 0 ]; then
+  ECS_ROLE_CREATE_OPTION="CreateServiceLinkedRole=false"
+# 存在しない場合はServiceLinkedRoleを作成する
+else
+  ECS_ROLE_CREATE_OPTION="CreateServiceLinkedRole=true"
+fi
+
 aws cloudformation deploy \
 --stack-name springboot-apps-template-ecs-role \
 --template-file ./04.01.ecs.task.role.yaml \
---capabilities CAPABILITY_NAMED_IAM
+--capabilities CAPABILITY_NAMED_IAM \
+--parameter-overrides $ECS_ROLE_CREATE_OPTION
 
 # ECSタスク定義
 aws cloudformation deploy \

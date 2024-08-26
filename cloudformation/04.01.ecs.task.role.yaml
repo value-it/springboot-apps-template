@@ -4,6 +4,15 @@ Parameters:
   ProjectName:
     Type: String
     Default: bootapps-tmpl
+  CreateServiceLinkedRole:
+    Type: String
+    Default: "true"
+    AllowedValues:
+      - "true"
+      - "false"
+
+Conditions:
+  ShouldCreateServiceLinkedRole: !Equals [!Ref CreateServiceLinkedRole, "true"]
 
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 Resources:
@@ -78,6 +87,7 @@ Resources:
 
   AWSServiceLinkedRole:
     Type: AWS::IAM::ServiceLinkedRole
+    Condition: ShouldCreateServiceLinkedRole
     Properties:
       AWSServiceName: ecs.amazonaws.com
 

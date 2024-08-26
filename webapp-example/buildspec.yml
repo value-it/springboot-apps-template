@@ -10,7 +10,7 @@ env:
 phases:
   install:
     runtime-versions:
-      java: corretto17
+      java: corretto21
   pre_build:
     commands:
       - DEFAULT=`pwd`
