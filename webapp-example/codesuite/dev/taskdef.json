@@ -13,10 +13,10 @@
           "awslogs-stream-prefix": "dev"
         }
       },
-      "secrets": [
+      "environment": [
         {
           "name": "ENV_TEST",
-          "valueFrom": "arn:aws:ssm:ap-northeast-1:<AWS_ACCOUNT_ID>:parameter/ENV_TEST"
+          "value": "ENV_TEST_VALUE"
         }
       ],
       "portMappings": [
