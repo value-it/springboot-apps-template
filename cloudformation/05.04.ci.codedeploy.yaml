@@ -5,7 +5,9 @@ Parameters:
   ProjectName:
     Type: String
     Default: bootapps-tmpl
-
+  TerminationWaitTimeInMinutes:
+    Type: Number
+    Default: 0
 
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 Resources:
@@ -26,11 +28,12 @@ Resources:
         DeploymentOption: WITH_TRAFFIC_CONTROL
       BlueGreenDeploymentConfiguration:
         DeploymentReadyOption:
-          ActionOnTimeout: STOP_DEPLOYMENT
-          WaitTimeInMinutes: 1440
+          ActionOnTimeout: CONTINUE_DEPLOYMENT
+#          ActionOnTimeout: STOP_DEPLOYMENT
+#          WaitTimeInMinutes: 1440
         TerminateBlueInstancesOnDeploymentSuccess:
           Action: TERMINATE
-          TerminationWaitTimeInMinutes: 1440
+          TerminationWaitTimeInMinutes: !Ref TerminationWaitTimeInMinutes
       DeploymentConfigName: CodeDeployDefault.ECSAllAtOnce
       LoadBalancerInfo:
         TargetGroupPairInfoList:
