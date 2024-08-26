@@ -21,12 +21,12 @@ Mappings:
   # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
   scaling:
     dev:
-      MinCapacity: 2
-      MaxCapacity: 5
+      MinCapacity: 1
+      MaxCapacity: 2
 
     prod:
       MinCapacity: 2
-      MaxCapacity: 10
+      MaxCapacity: 5
 
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 Resources:
