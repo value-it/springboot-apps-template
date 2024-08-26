@@ -1,8 +1,9 @@
 package example.web.domain.model.bookcatalog;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 public record Pages(
         @Min(value = 1, message = "ページ数は1以上の整数を入力してください")

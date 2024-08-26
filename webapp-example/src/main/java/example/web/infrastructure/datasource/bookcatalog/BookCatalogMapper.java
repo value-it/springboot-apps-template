@@ -1,32 +1,28 @@
 package example.web.infrastructure.datasource.bookcatalog;
 
-import example.web.domain.model.bookcatalog.Book;
-import example.web.domain.model.bookcatalog.BookId;
-import example.web.domain.model.bookcatalog.BookRevision;
-import example.web.domain.model.bookcatalog.Title;
+import example.web.infrastructure.datasource.bookcatalog.dto.BookDto;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
-import java.util.Optional;
 
 @Mapper
 public interface BookCatalogMapper {
 
-    List<Book> findAll();
+    List<BookDto> findAll();
 
-    void insertBook(Book book);
+    void insertBook(BookDto bookDto);
 
-    void insertRevision(Book book);
+    void insertRevision(BookDto bookDto);
 
-    void insertRevisionLatest(Book book);
+    void insertRevisionLatest(BookDto bookDto);
 
-    void deleteRevisionLatest(Book book);
+    void deleteRevisionLatest(BookDto bookDto);
 
-    Optional<Book> findById(BookId bookId);
+    BookDto findById(Long bookId);
 
-    BookId nextId();
+    BookDto findByName(String title);
 
-    BookRevision nextRevision();
+    Long nextId();
 
-    Optional<Book> findByName(Title title);
+    Long nextRevision();
 }

@@ -14,7 +14,7 @@
 
 ## 前提
 
-### 要Java17
+### 要Java21
 https://aws.amazon.com/jp/corretto/
 
 ## サンプルWEBアプリ起動手順

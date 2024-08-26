@@ -6,8 +6,6 @@ import example.web.domain.model.bookcatalog.Title;
 import example.web.domain.model.bookcatalog.repository.BookCatalogRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class BookConsistencyService {
     private final BookCatalogRepository bookCatalogRepository;
@@ -17,11 +15,11 @@ public class BookConsistencyService {
     }
 
     public boolean isTitleExists(Title title) {
-        return bookCatalogRepository.findByName(title).isPresent();
+        return bookCatalogRepository.findByName(title) != null;
     }
 
     public boolean isTitleExists(Title title, BookId excludeId) {
-        Optional<Book> book = bookCatalogRepository.findByName(title);
-        return book.isPresent() && book.get().bookId().notEquals(excludeId);
+        Book book = bookCatalogRepository.findByName(title);
+        return book != null && book.bookId().notEquals(excludeId);
     }
 }

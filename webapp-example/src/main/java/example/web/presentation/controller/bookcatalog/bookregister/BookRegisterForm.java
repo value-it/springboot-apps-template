@@ -1,8 +1,8 @@
 package example.web.presentation.controller.bookcatalog.bookregister;
 
 import example.web.domain.model.bookcatalog.*;
+import jakarta.validation.Valid;
 
-import javax.validation.Valid;
 import java.util.Objects;
 
 public final class BookRegisterForm {

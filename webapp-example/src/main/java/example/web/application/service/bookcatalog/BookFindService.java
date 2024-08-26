@@ -20,7 +20,6 @@ public class BookFindService {
     }
 
     public Book findById(BookId bookId) {
-        return bookCatalogRepository.findById(bookId)
-                .orElseThrow(() -> new IllegalArgumentException("BookId:" + bookId));
+        return bookCatalogRepository.findById(bookId);
     }
 }

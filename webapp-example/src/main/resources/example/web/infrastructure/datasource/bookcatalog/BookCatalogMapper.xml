@@ -2,48 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="example.web.infrastructure.datasource.bookcatalog.BookCatalogMapper">
-    <resultMap id="Book" type="example.web.domain.model.bookcatalog.Book">
-        <constructor>
-            <idArg name="bookId" resultMap="BookId"/>
-            <arg name="revision" resultMap="Revision"/>
-            <arg name="title" resultMap="Title"/>
-            <arg name="isbn" resultMap="Isbn"/>
-            <arg name="pages" resultMap="Pages"/>
-        </constructor>
-    </resultMap>
-
-    <resultMap id="BookId" type="example.web.domain.model.bookcatalog.BookId">
-        <constructor>
-            <arg name="value" column="id" javaType="Long"/>
-        </constructor>
-    </resultMap>
-
-    <resultMap id="Revision" type="example.web.domain.model.bookcatalog.BookRevision">
-        <constructor>
-            <arg name="value" column="revision" javaType="Long"/>
-        </constructor>
-    </resultMap>
-
-    <resultMap id="Title" type="example.web.domain.model.bookcatalog.Title">
-        <constructor>
-            <arg name="value" column="title" javaType="String"/>
-        </constructor>
-    </resultMap>
-
-    <resultMap id="Isbn" type="example.web.domain.model.bookcatalog.Isbn">
-        <constructor>
-            <arg name="value" column="isbn" javaType="String"/>
-        </constructor>
-    </resultMap>
-
-    <resultMap id="Pages" type="example.web.domain.model.bookcatalog.Pages">
-        <constructor>
-            <arg name="value" column="pages" javaType="Integer"/>
-        </constructor>
-    </resultMap>
+    <resultMap id="BookDto" type="example.web.infrastructure.datasource.bookcatalog.dto.BookDto" />
 
     <sql id="selectBase">
-        SELECT books.id
+        SELECT books.id AS bookId
              , books_revision.revision
              , title
              , isbn
@@ -53,52 +15,52 @@
                  INNER JOIN bookcatalog.books_revision ON books_revision.revision = books_revision_latest.revision
     </sql>
 
-    <select id="findAll" resultMap="Book">
+    <select id="findAll" resultMap="BookDto">
         <include refid="selectBase"/>
         ORDER BY id
     </select>
 
-    <select id="findById" resultMap="Book">
+    <select id="findById" resultMap="BookDto">
         <include refid="selectBase"/>
         WHERE id = #{value}
     </select>
 
-    <select id="findByName" resultMap="Book">
+    <select id="findByName" resultMap="BookDto">
         <include refid="selectBase"/>
         WHERE title = #{value}
     </select>
 
-    <select id="nextId" resultMap="BookId">
+    <select id="nextId" resultType="Long">
         SELECT nextval('bookcatalog.seq_book_id') AS id
     </select>
 
-    <select id="nextRevision" resultMap="Revision">
+    <select id="nextRevision" resultType="Long">
         SELECT nextval('bookcatalog.seq_book_revision') AS revision
     </select>
 
     <insert id="insertBook">
         INSERT INTO bookcatalog.books(id)
-        VALUES (#{bookId.value})
+        VALUES (#{bookId})
     </insert>
 
     <insert id="insertRevision">
         INSERT INTO bookcatalog.books_revision(revision, book_id, title, isbn, pages)
-        VALUES (#{revision.value},
-                #{bookId.value},
-                #{title.value},
-                #{isbn.value},
-                #{pages.value})
+        VALUES (#{revision},
+                #{bookId},
+                #{title},
+                #{isbn},
+                #{pages})
     </insert>
 
     <delete id="deleteRevisionLatest">
         DELETE
         FROM bookcatalog.books_revision_latest
-        WHERE book_id = #{bookId.value}
+        WHERE book_id = #{bookId}
     </delete>
 
     <insert id="insertRevisionLatest">
         INSERT INTO bookcatalog.books_revision_latest(book_id, revision)
-        VALUES (#{bookId.value},
-                #{revision.value})
+        VALUES (#{bookId},
+                #{revision})
     </insert>
 </mapper>
