@@ -81,6 +81,12 @@ aws cloudformation wait stack-delete-complete --stack-name springboot-apps-templ
 echo "delete-stack springboot-apps-template-ecs-base-$STAGE"
 aws cloudformation delete-stack --stack-name springboot-apps-template-ecs-base-$STAGE
 
+# Green系TargetGroupのスタック削除でエラーにならないように予めリスナールールを消しておく
+LISTENER_RULE_RPOD_ARN=$(aws cloudformation list-exports --query "Exports[?Name=='webapp-example-$STAGE-listener-rule-prod'].Value" --output text)
+aws elbv2 delete-rule --rule-arn $LISTENER_RULE_RPOD_ARN
+LISTENER_RULE_TEST_ARN=$(aws cloudformation list-exports --query "Exports[?Name=='webapp-example-$STAGE-listener-rule-test'].Value" --output text)
+aws elbv2 delete-rule --rule-arn $LISTENER_RULE_TEST_ARN
+
 # ALB(TargetGroup)
 echo "delete-stack springboot-apps-template-alb-tg-$STAGE"
 aws cloudformation delete-stack --stack-name springboot-apps-template-alb-tg-$STAGE

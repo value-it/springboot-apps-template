@@ -33,7 +33,7 @@ aws cloudformation deploy \
 # webapp-example
 aws cloudformation deploy \
 --stack-name springboot-apps-template-alb-tg-$STAGE \
---template-file ./cloudformation/03.02.alb.targetgroup.yaml \
+--template-file ./03.02.alb.targetgroup.yaml \
 --parameter-overrides ApplicationName=webapp-example \
   AlbNameSuffix=webapps-alb \
 || exit 1
@@ -54,12 +54,12 @@ aws cloudformation deploy \
 # ECSクラスター作成
 aws cloudformation deploy \
 --stack-name springboot-apps-template-ecs-cluster-$STAGE \
---template-file ./cloudformation/04.02.ecs.cluster.yaml \
+--template-file ./04.02.ecs.cluster.yaml \
 || exit 1
 
 # ECSタスク定義
 aws cloudformation deploy \
---stack-name springboot-apps-template-ecs-task-$STAGE \
+--stack-name springboot-apps-template-ecs-task-def-$STAGE \
 --template-file ./04.03.ecs.task.def.yaml \
 || exit 1
 
@@ -101,3 +101,8 @@ aws cloudformation deploy \
 --stack-name springboot-apps-template-ci-codepipeline-$STAGE \
 --template-file ./05.05.ci.codepipeline.yaml \
 --parameter-overrides CodeStarConnectionArn=$CODESTAR_CONNECTION_ARN
+
+aws ecs update-service \
+--cluster bootapps-tmpl-$STAGE-cluster \
+--service bootapps-tmpl-$STAGE-webapp-example-service \
+--desired-count 1 > /dev/null 2>&1

@@ -131,7 +131,7 @@ Resources:
               - s3:PutObject
             Effect: Allow
             Resource:
-              - !Sub 'arn:aws:s3:::${ProjectName}-${AlbNameSuffix}-logs-${S3BucketNameSuffix}-${Stage}/*'
+              - !Sub 'arn:aws:s3:::${ProjectName}-${Stage}-${AlbNameSuffix}-logs-${S3BucketNameSuffix}/*'
             Principal:
               AWS: !Ref AlbLogsS3BucketPrincipalAWSArn
 
