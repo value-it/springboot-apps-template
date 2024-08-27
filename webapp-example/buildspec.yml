@@ -16,13 +16,14 @@ phases:
       - DEFAULT=`pwd`
       - echo `java --version`
 
+      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
+
       - echo login Docker Hub
       - echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
 
       - echo login ECR
-      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.ap-northeast-1.amazonaws.com
 
-      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
   build:
     commands:
@@ -42,6 +43,9 @@ phases:
       - cp ./codesuite/${ENV,,}/taskdef.json $DEFAULT/
       - cd $DEFAULT
       - sed -i -e "s/<AWS_ACCOUNT_ID>/$AWS_ACCOUNT_ID/g" taskdef.json
+      - sed -i -e "s/<ECS_EXTRA_S3_BUCKET_NAME>/$ECS_EXTRA_S3_BUCKET_NAME/g" taskdef.json
+      - sed -i -e "s@<CONF_S3_PATH_PREFIX>@$CONF_S3_PATH_PREFIX@g" taskdef.json
+
       - printf '{"Version":"1.0","ImageURI":"%s"}' $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPOSITORY_NAME:$IMAGE_TAG > imageDetail.json
 artifacts:
   files:
