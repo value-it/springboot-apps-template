@@ -10,6 +10,8 @@ cd $CURRENT_DIR
 
 STAGE=dev
 
+# ---
+
 # 基本ネットワーク構築
 aws cloudformation deploy \
 --stack-name springboot-apps-template-network-$STAGE \
@@ -102,6 +104,9 @@ aws cloudformation deploy \
 --template-file ./05.05.ci.codepipeline.yaml \
 --parameter-overrides CodeStarConnectionArn=$CODESTAR_CONNECTION_ARN
 
+# ---
+
+# ECSタスク起動
 aws ecs update-service \
 --cluster bootapps-tmpl-$STAGE-cluster \
 --service bootapps-tmpl-$STAGE-webapp-example-service \
