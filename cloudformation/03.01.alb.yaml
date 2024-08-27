@@ -99,7 +99,7 @@ Resources:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
     Properties:
-      BucketName: !Sub ${ProjectName}-${AlbNameSuffix}-logs-${S3BucketNameSuffix}-${Stage}
+      BucketName: !Sub ${ProjectName}-${Stage}-${AlbNameSuffix}-logs-${S3BucketNameSuffix}
       AccessControl: Private
       VersioningConfiguration:
         Status: Suspended

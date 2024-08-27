@@ -27,7 +27,7 @@ RES=`aws s3api delete-objects --bucket bootapps-tmpl-$STAGE-ecs-logs-base \
 # バケット削除
 aws s3 rb s3://bootapps-tmpl-$STAGE-ecs-logs-base --force
 
-# bucket bootapps-tmpl-dev-webapps-alb-logs-base
+# bucket bootapps-tmpl-$STAGE-webapps-alb-logs-base
 RES=`aws s3api delete-objects --bucket bootapps-tmpl-$STAGE-webapps-alb-logs-base \
 --delete "$(aws s3api list-object-versions --bucket bootapps-tmpl-$STAGE-webapps-alb-logs-base \
 --query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}')"`
