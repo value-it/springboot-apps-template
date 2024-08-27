@@ -3,7 +3,7 @@
   "executionRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/bootapps-tmpl-ECS-ExecRole",
   "containerDefinitions": [
     {
-      "name": "bootapps-tmpl-base",
+      "name": "webapp-example",
       "image": "<IMAGE1_NAME>",
       "logConfiguration": {
         "logDriver": "awslogs",
