@@ -5,9 +5,9 @@ Parameters:
     Type: String
     Default: bootapps-tmpl
 
-  EcsNameSuffix:
+  ApplicationName:
     Type: String
-    Default: base
+    Default: webapp-example
 
   Stage:
     Type: String
@@ -39,9 +39,9 @@ Resources:
     Properties:
       ContainerDefinitions:
         -
-          Name: !Sub ${ProjectName}-base
+          Name: !Sub ${ApplicationName}
           Image: !Sub
-            - ${AwsAccountId}.dkr.ecr.ap-northeast-1.amazonaws.com/${ProjectName}/application:latest
+            - ${AwsAccountId}.dkr.ecr.ap-northeast-1.amazonaws.com/${ProjectName}/${Stage}/application:latest
             - AwsAccountId:
                 !Ref AWS::AccountId
           LogConfiguration:
@@ -49,7 +49,7 @@ Resources:
             Options:
               awslogs-group:
                 Fn::ImportValue:
-                  !Sub ECS-LogGroup-${ProjectName}
+                  !Sub ECS-LogGroup-${ProjectName}-${Stage}
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: task
           # MemoryReservation: 2048
@@ -61,11 +61,11 @@ Resources:
 
       ExecutionRoleArn:
         Fn::ImportValue:
-          !Sub ECS-ExecRoleArn-${ProjectName}
+          !Sub ECS-ExecRoleArn-${ProjectName}-${Stage}
       TaskRoleArn:
         Fn::ImportValue:
-          !Sub ECS-TaskRoleArn-${ProjectName}
-      Family: !Sub '${ProjectName}-${EcsNameSuffix}'
+          !Sub ECS-TaskRoleArn-${ProjectName}-${Stage}
+      Family: !Sub '${ProjectName}-${Stage}-${ApplicationName}'
       NetworkMode: awsvpc
       Cpu: !FindInMap [ spec, !Ref Stage, CPU ]
       Memory: !FindInMap [ spec, !Ref Stage, Memory ]
@@ -84,4 +84,5 @@ Outputs:
             - - ECS
               - Task
               - !Ref ProjectName
-              - !Ref EcsNameSuffix
+              - !Ref Stage
+              - !Ref ApplicationName

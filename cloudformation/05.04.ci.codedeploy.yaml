@@ -8,6 +8,17 @@ Parameters:
   TerminationWaitTimeInMinutes:
     Type: Number
     Default: 0
+  Stage:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prd
+  ApplicationName:
+    Type: String
+    Default: webapp-example
+  AlbNameSuffix:
+    Type: String
 
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 Resources:
@@ -15,14 +26,14 @@ Resources:
   Application:
     Type: "AWS::CodeDeploy::Application"
     Properties:
-      ApplicationName: !Sub DeployApp-${ProjectName}
+      ApplicationName: !Sub DeployApp-${ProjectName}-${Stage}-${ApplicationName}
       ComputePlatform: ECS
 
   DeploymentGroup:
     Type: AWS::CodeDeploy::DeploymentGroup
     Properties:
       ApplicationName: !Ref Application
-      DeploymentGroupName: !Sub DeploymentGroup-${ProjectName}
+      DeploymentGroupName: !Sub DeploymentGroup-${ProjectName}-${Stage}-${ApplicationName}
       DeploymentStyle:
         DeploymentType: BLUE_GREEN
         DeploymentOption: WITH_TRAFFIC_CONTROL
@@ -38,28 +49,27 @@ Resources:
       LoadBalancerInfo:
         TargetGroupPairInfoList:
           - TargetGroups:
-            - Name: !Sub ${ProjectName}-blue-tg
-            - Name: !Sub ${ProjectName}-green-tg
+            - Name:
+                Fn::ImportValue: !Sub ${ApplicationName}-${Stage}-tg-blue
+            - Name:
+                Fn::ImportValue: !Sub ${ApplicationName}-${Stage}-tg-green
             ProdTrafficRoute:
               ListenerArns:
-                - Fn::ImportValue: !Sub ${ProjectName}-alb-listener-prod
+                - Fn::ImportValue: !Sub ${ProjectName}-${Stage}-${AlbNameSuffix}-listener-prod
             TestTrafficRoute:
               ListenerArns:
-                - Fn::ImportValue: !Sub ${ProjectName}-alb-listener-test
+                - Fn::ImportValue: !Sub ${ProjectName}-${Stage}-${AlbNameSuffix}-listener-test
       ECSServices:
         - ClusterName:
-            !Sub ${ProjectName}-cluster
+            Fn::ImportValue: !Sub ECS-Cluster-${ProjectName}-${Stage}
           ServiceName:
-            !Sub ${ProjectName}-service
+            Fn::ImportValue: !Sub ECS-ServiceName-${ProjectName}-${Stage}
       ServiceRoleArn:
-        Fn::ImportValue:
-          !Sub CodeDeployRoleArn-${ProjectName}
-
+        Fn::ImportValue: !Sub CodeDeployRoleArn-${ProjectName}-${Stage}
 
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 Outputs:
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
-
   # - - - - - - - - - - - - - - - - -
   DeploymentGroup:
     Value: !Ref DeploymentGroup
@@ -68,3 +78,4 @@ Outputs:
         - '-'
         - - DeploymentGroup
           - !Sub ${ProjectName}
+          - !Sub ${Stage}

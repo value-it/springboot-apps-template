@@ -1,26 +1,23 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'Codebuild.'
+
 Parameters:
   ProjectName:
     Type: String
     Default: bootapps-tmpl
-
   Stage:
     Type: String
     Default: dev
     AllowedValues:
       - dev
       - prd
-
-  GithubOrganization:
-    Type: String
-    Default: value-it
-
-  GithubRepository:
-    Type: String
-    Default: springboot-apps-template
-
   ApplicationName:
+    Type: String
+    Default: webapp-example
+  BuildSpecFileName:
+    Type: String
+    Default: buildspec.yml
+  SourceDirectoryName:
     Type: String
     Default: webapp-example
 
@@ -49,21 +46,36 @@ Resources:
       Artifacts:
         Type: CODEPIPELINE
       BadgeEnabled: false
-      Description: !Sub "build ${ProjectName} application"
+      Description: !Sub "build ${ProjectName}-${ApplicationName}-${Stage}"
       Name: !Join
         - '-'
         - - !Ref ProjectName
-          - app-buiild
+          - !Ref Stage
+          - !Ref ApplicationName
+          - buiild
       ServiceRole:
         Fn::ImportValue:
-          !Sub CodebuildRole-${ProjectName}
+          !Sub CodebuildRole-${ProjectName}-${Stage}
+      VpcConfig:
+        VpcId:
+          Fn::ImportValue:
+            !Sub ${ProjectName}-${Stage}-network-vpc
+        SecurityGroupIds:
+          - Fn::ImportValue:
+              !Sub ${ProjectName}-${Stage}-sg-ecs
+        Subnets:
+          - Fn::ImportValue:
+              !Sub ${ProjectName}-${Stage}-network-private1-subnet
+          - Fn::ImportValue:
+              !Sub ${ProjectName}-${Stage}-network-private2-subnet
+          - Fn::ImportValue:
+              !Sub ${ProjectName}-${Stage}-network-private3-subnet
       Environment:
         Type: LINUX_CONTAINER
         # CodeBuild内でdockerビルドできるようにするために特権付与
         PrivilegedMode: True
         ComputeType: !FindInMap [ spec, !Ref Stage, ComputeType ]
-
-        Image: aws/codebuild/amazonlinux2-x86_64-standard:4.0
+        Image: aws/codebuild/amazonlinux2-x86_64-standard:5.0
         EnvironmentVariables:
           # ======================
           # 環境変数
@@ -72,14 +84,28 @@ Resources:
             Value: !Ref Stage
             Type: PLAINTEXT
           - Name: IMAGE_REPOSITORY_NAME
-            Value: !Sub "${ProjectName}/application"
+            Value:
+              Fn::ImportValue:
+                !Sub EcrRepository-${ProjectName}-${Stage}-${ApplicationName}
+            Type: PLAINTEXT
+          - Name: ECS_EXTRA_S3_BUCKET_NAME
+            Value:
+              Fn::ImportValue:
+                !Sub S3Bucket-${ProjectName}-${Stage}-ecs-extras
             Type: PLAINTEXT
 
       Source:
         Type: CODEPIPELINE
-        BuildSpec: !Sub "${ApplicationName}/buildspec.yml"
+        BuildSpec: !Sub "${SourceDirectoryName}/${BuildSpecFileName}"
 
       TimeoutInMinutes: 30
+      LogsConfig:
+        CloudWatchLogs:
+          Status: ENABLED
+          GroupName:
+            Fn::ImportValue:
+              !Sub CodeBuild-LogGroup-${ProjectName}-${Stage}
+          StreamName: !Sub ${ProjectName}-${ApplicationName}-${Stage}
 
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 Outputs:
@@ -92,4 +118,6 @@ Outputs:
       Name: !Join
         - '-'
         - - CodeBuild
-          - !Sub ${ProjectName}
+          - !Ref ProjectName
+          - !Ref Stage
+          - !Ref ApplicationName

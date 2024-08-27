@@ -9,6 +9,12 @@ Parameters:
   ProjectName:
     Type: String
     Default: bootapps-tmpl
+  Stage:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prd
 
 Resources:
   # ------------------------------------------------------------#
@@ -27,7 +33,7 @@ Resources:
       InstanceTenancy: default
       Tags:
         - Key: Name
-          Value: !Sub "${ProjectName}-vpc"
+          Value: !Sub "${ProjectName}-${Stage}-vpc"
 
   # InternetGateway Create
   InternetGateway:
@@ -35,7 +41,7 @@ Resources:
     Properties:
       Tags:
         - Key: Name
-          Value: !Sub "${ProjectName}-network-igw"
+          Value: !Sub "${ProjectName}-${Stage}-network-igw"
 
   # IGW Attach
   InternetGatewayAttachment:
@@ -56,7 +62,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub "${ProjectName}-network-public1-subnet"
+          Value: !Sub "${ProjectName}-${Stage}-network-public1-subnet"
 
   # Public2 Subnet Create
   Public2Subnet:
@@ -67,7 +73,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub "${ProjectName}-network-public2-subnet"
+          Value: !Sub "${ProjectName}-${Stage}-network-public2-subnet"
 
   # Public3 Subnet Create
   Public3Subnet:
@@ -78,7 +84,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub "${ProjectName}-network-public3-subnet"
+          Value: !Sub "${ProjectName}-${Stage}-network-public3-subnet"
 
   # Private1 Subnet Create
   Private1Subnet:
@@ -89,7 +95,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub "${ProjectName}-network-private1-subnet"
+          Value: !Sub "${ProjectName}-${Stage}-network-private1-subnet"
 
   # Private2 Subnet Create
   Private2Subnet:
@@ -100,7 +106,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub "${ProjectName}-network-private2-subnet"
+          Value: !Sub "${ProjectName}-${Stage}-network-private2-subnet"
 
   # Private3 Subnet Create
   Private3Subnet:
@@ -111,7 +117,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub "${ProjectName}-network-private3-subnet"
+          Value: !Sub "${ProjectName}-${Stage}-network-private3-subnet"
 
   # ------------------------------------------------------------#
   #  NAT Gateway
@@ -124,7 +130,7 @@ Resources:
       SubnetId: !Ref Public1Subnet
       Tags:
         - Key: Name
-          Value: !Sub "${ProjectName}-network-natgw"
+          Value: !Sub "${ProjectName}-${Stage}-network-natgw"
   # NATGateway For Elastic IP Create
   NATGatewayAEIP:
     Type: "AWS::EC2::EIP"
@@ -145,7 +151,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub "${ProjectName}-network-public-route"
+          Value: !Sub "${ProjectName}-${Stage}-network-public-route"
 
   # Private RouteTable Create
   PrivateRouteTable:
@@ -154,7 +160,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub "${ProjectName}-network-private-route"
+          Value: !Sub "${ProjectName}-${Stage}-network-private-route"
 
   # ------------------------------------------------------------#
   # Routing
@@ -218,41 +224,41 @@ Outputs:
   VPC:
     Value: !Ref VPC
     Export:
-      Name: !Sub "${ProjectName}-network-vpc"
+      Name: !Sub "${ProjectName}-${Stage}-network-vpc"
 
   # Subnet
   Public1Subnet:
     Value: !Ref Public1Subnet
     Export:
-      Name: !Sub "${ProjectName}-network-public1-subnet"
+      Name: !Sub "${ProjectName}-${Stage}-network-public1-subnet"
 
   Public2Subnet:
     Value: !Ref Public2Subnet
     Export:
-      Name: !Sub "${ProjectName}-network-public2-subnet"
+      Name: !Sub "${ProjectName}-${Stage}-network-public2-subnet"
 
   Public3Subnet:
     Value: !Ref Public3Subnet
     Export:
-      Name: !Sub "${ProjectName}-network-public3-subnet"
+      Name: !Sub "${ProjectName}-${Stage}-network-public3-subnet"
 
   Private1Subnet:
     Value: !Ref Private1Subnet
     Export:
-      Name: !Sub "${ProjectName}-network-private1-subnet"
+      Name: !Sub "${ProjectName}-${Stage}-network-private1-subnet"
 
   Private2Subnet:
     Value: !Ref Private2Subnet
     Export:
-      Name: !Sub "${ProjectName}-network-private2-subnet"
+      Name: !Sub "${ProjectName}-${Stage}-network-private2-subnet"
 
   Private3Subnet:
     Value: !Ref Private3Subnet
     Export:
-      Name: !Sub "${ProjectName}-network-private3-subnet"
+      Name: !Sub "${ProjectName}-${Stage}-network-private3-subnet"
 
   VPCCidrBlock:
     Value: !GetAtt VPC.CidrBlock
     Export:
-      Name: !Sub "${ProjectName}-network-vpc-cidrblock"
+      Name: !Sub "${ProjectName}-${Stage}-network-vpc-cidrblock"
 

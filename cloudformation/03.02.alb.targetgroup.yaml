@@ -1,0 +1,162 @@
+AWSTemplateFormatVersion:
+  "2010-09-09"
+Description: "ALB"
+
+# ------------------------------------------------------------#
+# Input Parameters
+# ------------------------------------------------------------#
+Parameters:
+  ProjectName:
+    Type: String
+    Default: bootapps-tmpl
+  ApplicationName:
+    Type: String
+    AllowedValues:
+      - webapp-example
+  Stage:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prd
+  AlbNameSuffix:
+    Type: String
+
+Mappings:
+  dev:
+    webapp-example:
+      pathpattern: "*"
+      priority: 100
+      port: 38080
+      healthcheckpath: "/actuator/health"
+
+Resources:
+  # - - - - - - - - - - - - - - - - -
+  ALBTargetGroupBlue:
+  # - - - - - - - - - - - - - - - - -
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: !FindInMap [ !Ref Stage, !Ref ApplicationName, healthcheckpath ]
+      HealthCheckPort: traffic-port
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: 200
+      Name: !Sub ${ApplicationName}-${Stage}-blue-tg
+      Port: !FindInMap [ !Ref Stage, !Ref ApplicationName, port ]
+      Protocol: HTTP
+      Tags:
+        - Key: Name
+          Value: !Sub ${ApplicationName}-${Stage}-blue-tg
+      TargetGroupAttributes:
+        - Key: "deregistration_delay.timeout_seconds"
+          Value: 60
+        - Key: "slow_start.duration_seconds"
+          Value: 30
+        - Key: "stickiness.enabled"
+          Value: false
+        - Key: "stickiness.type"
+          Value: lb_cookie
+        - Key: "stickiness.lb_cookie.duration_seconds"
+          Value: 604800
+      TargetType: ip
+      VpcId:
+        Fn::ImportValue:
+          !Sub ${ProjectName}-${Stage}-network-vpc
+
+  # - - - - - - - - - - - - - - - - -
+  ALBTargetGroupGreen:
+    # - - - - - - - - - - - - - - - - -
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: !FindInMap [ !Ref Stage, !Ref ApplicationName, healthcheckpath ]
+      HealthCheckPort: traffic-port
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: 200
+      Name: !Sub ${ApplicationName}-${Stage}-green-tg
+      Port: !FindInMap [ !Ref Stage, !Ref ApplicationName, port ]
+      Protocol: HTTP
+      Tags:
+        - Key: Name
+          Value: !Sub ${ApplicationName}-${Stage}-green-tg
+      TargetGroupAttributes:
+        - Key: "deregistration_delay.timeout_seconds"
+          Value: 60
+        - Key: "slow_start.duration_seconds"
+          Value: 30
+        - Key: "stickiness.enabled"
+          Value: false
+        - Key: "stickiness.type"
+          Value: lb_cookie
+        - Key: "stickiness.lb_cookie.duration_seconds"
+          Value: 604800
+      TargetType: ip
+      VpcId:
+        Fn::ImportValue:
+          !Sub ${ProjectName}-${Stage}-network-vpc
+
+  # - - - - - - - - - - - - - - - - -
+  ALBListenerRuleForProd:
+    # - - - - - - - - - - - - - - - - -
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref ALBTargetGroupBlue
+      Conditions:
+        - Field: path-pattern
+          PathPatternConfig:
+            Values:
+              - !FindInMap [ !Ref Stage, !Ref ApplicationName, pathpattern ]
+      ListenerArn:
+        Fn::ImportValue: !Sub "${ProjectName}-${Stage}-${AlbNameSuffix}-listener-prod"
+      Priority: !FindInMap [ !Ref Stage, !Ref ApplicationName, priority ]
+
+  # - - - - - - - - - - - - - - - - -
+  ALBListenerRuleForTest:
+    # - - - - - - - - - - - - - - - - -
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref ALBTargetGroupBlue
+      Conditions:
+        - Field: path-pattern
+          PathPatternConfig:
+            Values:
+              - !FindInMap [ !Ref Stage, !Ref ApplicationName, pathpattern ]
+      ListenerArn:
+        Fn::ImportValue: !Sub "${ProjectName}-${Stage}-${AlbNameSuffix}-listener-test"
+      Priority: !FindInMap [ !Ref Stage, !Ref ApplicationName, priority ]
+
+
+# ------------------------------------------------------------#
+# Output Parameters
+# ------------------------------------------------------------#
+Outputs:
+
+  ALBTargetGroupBlueArn:
+    Value: !Ref ALBTargetGroupBlue
+    Export:
+      Name: !Sub "${ApplicationName}-${Stage}-tg-blue-arn"
+
+  ALBTargetGroupGreenArn:
+    Value: !Ref ALBTargetGroupGreen
+    Export:
+      Name: !Sub "${ApplicationName}-${Stage}-tg-green-arn"
+
+  ALBTargetGroupBlueName:
+    Value: !Sub ${ApplicationName}-${Stage}-blue-tg
+    Export:
+      Name: !Sub "${ApplicationName}-${Stage}-tg-blue"
+
+  ALBTargetGroupGreenName:
+    Value: !Sub ${ApplicationName}-${Stage}-green-tg
+    Export:
+      Name: !Sub "${ApplicationName}-${Stage}-tg-green"

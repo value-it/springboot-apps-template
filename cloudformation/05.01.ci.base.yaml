@@ -10,6 +10,9 @@ Parameters:
     AllowedValues:
       - dev
       - prd
+  S3BucketNameSuffix:
+    Type: String
+    Default: base
 
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 Resources:
@@ -23,8 +26,9 @@ Resources:
       BucketName: !Join
             - '-'
             - - !Ref ProjectName
-              - resources
               - !Ref Stage
+              - resources
+              - !Ref S3BucketNameSuffix
       AccessControl: Private
       BucketEncryption:
         ServerSideEncryptionConfiguration:
@@ -32,13 +36,19 @@ Resources:
               SSEAlgorithm: AES256
       VersioningConfiguration:
         Status: Suspended
+      LifecycleConfiguration:
+        Rules:
+          - Id: PurgeOutdatedArtifacts
+            Status: Enabled
+            ExpirationInDays: 30
       Tags:
         - Key: Name
           Value: !Join
             - '-'
             - - !Ref ProjectName
-              - resources
               - !Ref Stage
+              - resources
+              - !Ref S3BucketNameSuffix
         - Key: ProjectName
           Value: !Ref ProjectName
         - Key: Stage
@@ -52,6 +62,7 @@ Resources:
       RoleName: !Join
         - '-'
         - - !Ref ProjectName
+          - !Ref Stage
           - CodeBuild
       AssumeRolePolicyDocument:
         Statement:
@@ -76,7 +87,7 @@ Resources:
                   - logs:PutLogEvents
                 Effect: Allow
                 Resource:
-                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*
+                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild*
 
         - PolicyName: S3Artifacts
           PolicyDocument:
@@ -89,10 +100,16 @@ Resources:
                   - s3:GetObjectVersion
                   - s3:GetBucketVersioning
                 Effect: Allow
-                Resource: !Join
-                  - '/'
-                  - - !GetAtt S3BucketResources.Arn
-                    - '*'
+                Resource:
+                  - !Join
+                    - '/'
+                    - - !GetAtt S3BucketResources.Arn
+                      - '*'
+                  - !Join
+                    - '/'
+                    - - Fn::ImportValue:
+                          !Sub S3BucketArn-${ProjectName}-${Stage}-ecs-extras
+                      - '*'
         - PolicyName: VPCPolicy
           PolicyDocument:
             Version: '2012-10-17'
@@ -118,17 +135,32 @@ Resources:
                         - '/'
                         - - !Sub arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:subnet
                           - Fn::ImportValue:
-                              !Sub ${ProjectName}-network-public1-subnet
+                              !Sub ${ProjectName}-${Stage}-network-public1-subnet
                       - !Join
                         - '/'
                         - - !Sub arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:subnet
                           - Fn::ImportValue:
-                              !Sub ${ProjectName}-network-public2-subnet
+                              !Sub ${ProjectName}-${Stage}-network-public2-subnet
                       - !Join
                         - '/'
                         - - !Sub arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:subnet
                           - Fn::ImportValue:
-                              !Sub ${ProjectName}-network-public3-subnet
+                              !Sub ${ProjectName}-${Stage}-network-public3-subnet
+                      - !Join
+                        - '/'
+                        - - !Sub arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:subnet
+                          - Fn::ImportValue:
+                              !Sub ${ProjectName}-${Stage}-network-private1-subnet
+                      - !Join
+                        - '/'
+                        - - !Sub arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:subnet
+                          - Fn::ImportValue:
+                              !Sub ${ProjectName}-${Stage}-network-private2-subnet
+                      - !Join
+                        - '/'
+                        - - !Sub arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:subnet
+                          - Fn::ImportValue:
+                              !Sub ${ProjectName}-${Stage}-network-private3-subnet
 
         - PolicyName: SecretManager
           PolicyDocument:
@@ -182,7 +214,28 @@ Resources:
                   - ecr:InitiateLayerUpload
                   - ecr:GetRepositoryPolicy
                 Effect: Allow
-                Resource: !Sub arn:aws:ecr:*:${AWS::AccountId}:bootapps-tmpl/*
+                Resource: !Sub arn:aws:ecr:*:${AWS::AccountId}:${ProjectName}/${Stage}/*
+
+        - PolicyName: EcsDeploy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - ecs:DescribeServices
+                  - ecs:CreateTaskSet
+                  - ecs:UpdateService
+                  - ecs:UpdateServicePrimaryTaskSet
+                  - ecs:RegisterTaskDefinition
+                  - ecs:DeleteTaskSet
+                Effect: Allow
+                Resource: '*'
+              - Action:
+                  - iam:PassRole
+                Condition:
+                  StringLike:
+                    'iam:PassedToService': 'ecs-tasks.amazonaws.com'
+                Effect: Allow
+                Resource: '*'
 
 # - - - - - - - - - - - - - - - - -
   CodePipelineRole:
@@ -192,6 +245,7 @@ Resources:
       RoleName: !Join
         - '-'
         - - !Ref ProjectName
+          - !Ref Stage
           - CodePipeline
       AssumeRolePolicyDocument:
         Statement:
@@ -264,6 +318,7 @@ Resources:
       RoleName: !Join
         - '-'
         - - !Ref ProjectName
+          - !Ref Stage
           - CodeDeploy
       AssumeRolePolicyDocument:
         Statement:
@@ -288,6 +343,12 @@ Resources:
                 Effect: Allow
                 Resource: '*'
 
+  CodeBuildLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/codebuild'
+      RetentionInDays: 5
+
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 Outputs:
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
@@ -299,8 +360,8 @@ Outputs:
         - '-'
         - - S3Bucket
           - !Ref ProjectName
-          - resources
           - !Ref Stage
+          - resources
   S3BucketResourcesArn:
     Value: !GetAtt S3BucketResources.Arn
     Export:
@@ -308,8 +369,8 @@ Outputs:
         - '-'
         - - S3BucketArn
           - !Ref ProjectName
-          - resources
           - !Ref Stage
+          - resources
 
   # - - - - - - - - - - - - - - - - -
   CodebuildRole:
@@ -319,6 +380,7 @@ Outputs:
         - '-'
         - - CodebuildRole
           - !Ref ProjectName
+          - !Ref Stage
 
   CodebuildRoleArn:
     Value: !GetAtt CodebuildRole.Arn
@@ -327,6 +389,7 @@ Outputs:
         - '-'
         - - CodebuildRoleArn
           - !Ref ProjectName
+          - !Ref Stage
 
   # - - - - - - - - - - - - - - - - -
   CodePipelineRole:
@@ -336,6 +399,7 @@ Outputs:
         - '-'
         - - CodePipelineRole
           - !Ref ProjectName
+          - !Ref Stage
 
   CodePipelineRoleArn:
     Value: !GetAtt CodePipelineRole.Arn
@@ -344,6 +408,7 @@ Outputs:
         - '-'
         - - CodePipelineRoleArn
           - !Ref ProjectName
+          - !Ref Stage
 
   # - - - - - - - - - - - - - - - - -
   CodeDeployRole:
@@ -353,6 +418,7 @@ Outputs:
         - '-'
         - - CodeDeployRole
           - !Ref ProjectName
+          - !Ref Stage
 
   CodeDeployRoleArn:
     Value: !GetAtt CodeDeployRole.Arn
@@ -361,3 +427,15 @@ Outputs:
         - '-'
         - - CodeDeployRoleArn
           - !Ref ProjectName
+          - !Ref Stage
+
+  CodeBuildLogGroup:
+    Description: "LogGroup for CodeBuild"
+    Value: !Ref CodeBuildLogGroup
+    Export:
+      Name: !Join
+        - '-'
+        - - CodeBuild
+          - LogGroup
+          - !Ref ProjectName
+          - !Ref Stage

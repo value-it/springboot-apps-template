@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'ECS Cluster'
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: bootapps-tmpl
+  Stage:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prd
+
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+Resources:
+  # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+  # - - - - - - - - - - - - - - - - -
+  ECSCluster:
+    # - - - - - - - - - - - - - - - - -
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Join
+        - '-'
+        - - !Ref ProjectName
+          - !Ref Stage
+          - cluster
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+
+# + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+Outputs:
+  # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+  # - - - - - - - - - - - - - - - - -
+  ECSCluster:
+    Value: !Ref ECSCluster
+    Export:
+      Name: !Join
+        - '-'
+        - - ECS
+          - Cluster
+          - !Ref ProjectName
+          - !Ref Stage

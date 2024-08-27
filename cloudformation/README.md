@@ -45,73 +45,96 @@ export AWS_PROFILE=hogehoge
 export CODESTAR_CONNECTION_ARN=
 ```
 
+環境識別子を指定
+```shell
+export STAGE=dev
+```
+
+
 ### 1. 基本ネットワーク構築
 ```shell
 aws cloudformation deploy \
---stack-name springboot-apps-template-network \
+--stack-name springboot-apps-template-network-$STAGE \
 --template-file ./cloudformation/01-create-network.yaml
 ```
 
 ### 2. 基本SecurityGroup作成
 ```shell
 aws cloudformation deploy \
---stack-name springboot-apps-template-securitygroup \
+--stack-name springboot-apps-template-securitygroup-$STAGE \
 --template-file ./cloudformation/02-securitygroup.yaml 
 ```
 
 ### 3. ALB作成
 ```shell
+# ALB本体
 aws cloudformation deploy \
---stack-name springboot-apps-template-alb \
---template-file ./cloudformation/03-alb.yaml
+--stack-name springboot-apps-template-alb-$STAGE \
+--template-file ./cloudformation/03.01.alb.yaml \
+--parameter-overrides AlbNameSuffix=webapps-alb
+
+# TargetGroupとListenerルール
+aws cloudformation deploy \
+--stack-name springboot-apps-template-alb-tg-$STAGE \
+--template-file ./cloudformation/03.02.alb.targetgroup.yaml \
+--parameter-overrides ApplicationName=webapp-example \
+  AlbNameSuffix=webapps-alb
 ```
 
 ### 4. ECS定義作成
 ```shell
-# ECS用Role
+# 既存のServiceLinkedRoleが存在するか確認
+ECS_ROLE_CREATE_OPTION=$(aws iam get-role --role-name "AWSServiceRoleForECS" > /dev/null 2>&1 && echo "CreateServiceLinkedRole=false" || echo "CreateServiceLinkedRole=true")
+# ECS用Role等作成
 aws cloudformation deploy \
---stack-name springboot-apps-template-ecs-role \
---template-file ./cloudformation/04.01.ecs.task.role.yaml \
---capabilities CAPABILITY_NAMED_IAM
+--stack-name springboot-apps-template-ecs-base-$STAGE \
+--template-file ./cloudformation/04.01.ecs.task.base.yaml \
+--capabilities CAPABILITY_NAMED_IAM \
+--parameter-overrides $ECS_ROLE_CREATE_OPTION
+
+# ECSクラスター作成
+aws cloudformation deploy \
+--stack-name springboot-apps-template-ecs-cluster-$STAGE \
+--template-file ./cloudformation/04.02.ecs.cluster.yaml
 
 # ECSタスク定義
 aws cloudformation deploy \
---stack-name springboot-apps-template-ecs-task \
---template-file ./cloudformation/04.02.ecs.task.def.yaml
+--stack-name springboot-apps-template-ecs-task-def-$STAGE \
+--template-file ./cloudformation/04.03.ecs.task.def.yaml
 
 # ECSサービス
 aws cloudformation deploy \
---stack-name springboot-apps-template-ecs-service \
---template-file ./cloudformation/04.03.ecs.service.yaml \
---parameter-overrides MinCapacity=2 MaxCapacity=10
+--stack-name springboot-apps-template-ecs-service-$STAGE \
+--template-file ./cloudformation/04.04.ecs.service.yaml
 ```
 
 ### 5. CI/CD定義作成
 ```shell
 # Base
 aws cloudformation deploy \
---stack-name springboot-apps-template-ci-base \
+--stack-name springboot-apps-template-ci-base-$STAGE \
 --template-file ./cloudformation/05.01.ci.base.yaml \
 --capabilities CAPABILITY_NAMED_IAM
 
 # ECR
 aws cloudformation deploy \
---stack-name springboot-apps-template-ci-ecr \
+--stack-name springboot-apps-template-ci-ecr-$STAGE \
 --template-file ./cloudformation/05.02.ci.ecr.yaml
 
 # CodeBuild
 aws cloudformation deploy \
---stack-name springboot-apps-template-ci-codebuild \
+--stack-name springboot-apps-template-ci-codebuild-$STAGE \
 --template-file ./cloudformation/05.03.ci.codebuild.yaml
 
 # CodeDeploy
 aws cloudformation deploy \
---stack-name springboot-apps-template-ci-codedeploy \
---template-file ./cloudformation/05.04.ci.codedeploy.yaml
+--stack-name springboot-apps-template-ci-codedeploy-$STAGE \
+--template-file ./cloudformation/05.04.ci.codedeploy.yaml \
+--parameter-overrides AlbNameSuffix=webapps-alb ApplicationName=webapp-example
 
 # CodePipeline
 aws cloudformation deploy \
---stack-name springboot-apps-template-ci-codepipeline \
+--stack-name springboot-apps-template-ci-codepipeline-$STAGE \
 --template-file ./cloudformation/05.05.ci.codepipeline.yaml \
 --parameter-overrides CodeStarConnectionArn=$CODESTAR_CONNECTION_ARN
 ```
@@ -134,11 +157,22 @@ https://ap-northeast-1.console.aws.amazon.com/codesuite/codepipeline/pipelines?r
 
 ---
 
+## ECSタスク起動
+```shell
+# webapp-example
+aws ecs update-service \
+--cluster bootapps-tmpl-$STAGE-cluster \
+--service bootapps-tmpl-$STAGE-webapp-example-service \
+--desired-count 1 > /dev/null 2>&1
+```
+
+---
+
 ### （オプション）Aurora PostgreSQL作成
 作成しなくてもサンプルアプリは動く
 ```shell
 aws cloudformation deploy \
---stack-name springboot-apps-template-aurora \
+--stack-name springboot-apps-template-aurora-$STAGE \
 --template-file ./cloudformation/06.01.aurora.yaml
 ```
 

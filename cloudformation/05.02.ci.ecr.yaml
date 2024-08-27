@@ -1,9 +1,19 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'CI ECR.'
+
 Parameters:
   ProjectName:
     Type: String
     Default: bootapps-tmpl
+  Stage:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prd
+  ApplicationName:
+    Type: String
+    Default: webapp-example
 
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 Resources:
@@ -16,7 +26,8 @@ Resources:
       RepositoryName: !Join
             - '/'
             - - !Ref ProjectName
-              - 'application'
+              - !Ref Stage
+              - !Ref ApplicationName
       LifecyclePolicy:
         LifecyclePolicyText: |
           {
@@ -48,4 +59,5 @@ Outputs:
             - '-'
             - - EcrRepository
               - !Ref ProjectName
-              - 'application'
+              - !Ref Stage
+              - !Ref ApplicationName

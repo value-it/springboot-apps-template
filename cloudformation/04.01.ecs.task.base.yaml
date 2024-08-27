@@ -10,6 +10,15 @@ Parameters:
     AllowedValues:
       - "true"
       - "false"
+  Stage:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prd
+  S3BucketNameSuffix:
+    Type: String
+    Default: base
 
 Conditions:
   ShouldCreateServiceLinkedRole: !Equals [!Ref CreateServiceLinkedRole, "true"]
@@ -20,7 +29,7 @@ Resources:
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '/ecs/${ProjectName}'
+      LogGroupName: !Sub '/ecs/${ProjectName}/${Stage}'
       RetentionInDays: 365
 
   TaskExecRole:
@@ -29,6 +38,7 @@ Resources:
       RoleName: !Join
               - '-'
               - - !Ref ProjectName
+                - !Ref Stage
                 - ECS
                 - ExecRole
       AssumeRolePolicyDocument:
@@ -69,6 +79,7 @@ Resources:
       RoleName: !Join
         - '-'
         - - !Ref ProjectName
+          - !Ref Stage
           - ECS
           - TaskRole
       AssumeRolePolicyDocument:
@@ -84,12 +95,83 @@ Resources:
       Path: /
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AWSXrayFullAccess
 
   AWSServiceLinkedRole:
     Type: AWS::IAM::ServiceLinkedRole
     Condition: ShouldCreateServiceLinkedRole
     Properties:
       AWSServiceName: ecs.amazonaws.com
+
+  # - - - - - - - - - - - - - - - - -
+  S3BucketEcsExtras:
+    # - - - - - - - - - - - - - - - - -
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Join
+        - '-'
+        - - !Ref ProjectName
+          - !Ref Stage
+          - ecs
+          - extras
+          - !Ref S3BucketNameSuffix
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Suspended
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ProjectName
+              - !Ref Stage
+              - ecs
+              - extras
+              - !Ref S3BucketNameSuffix
+        - Key: ProjectName
+          Value: !Ref ProjectName
+
+  # - - - - - - - - - - - - - - - - -
+  S3BucketEcsLogs:
+    # - - - - - - - - - - - - - - - - -
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Join
+        - '-'
+        - - !Ref ProjectName
+          - !Ref Stage
+          - ecs
+          - logs
+          - !Ref S3BucketNameSuffix
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Suspended
+      LifecycleConfiguration:
+        Rules:
+          - Id: PurgeOutdatedArtifacts
+            Status: Enabled
+            ExpirationInDays: 30
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - !Ref ProjectName
+              - !Ref Stage
+              - ecs
+              - logs
+              - !Ref S3BucketNameSuffix
+        - Key: ProjectName
+          Value: !Ref ProjectName
 
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 Outputs:
@@ -103,6 +185,7 @@ Outputs:
         - - ECS
           - LogGroup
           - !Ref ProjectName
+          - !Ref Stage
 
 # - - - - - - - - - - - - - - - - -
   TaskExecRole:
@@ -113,6 +196,7 @@ Outputs:
             - - ECS
               - ExecRole
               - !Ref ProjectName
+              - !Ref Stage
 
 # - - - - - - - - - - - - - - - - -
   TaskExecRoleArn:
@@ -123,6 +207,7 @@ Outputs:
             - - ECS
               - ExecRoleArn
               - !Ref ProjectName
+              - !Ref Stage
 
   # - - - - - - - - - - - - - - - - -
   TaskRole:
@@ -133,6 +218,7 @@ Outputs:
         - - ECS
           - TaskRole
           - !Ref ProjectName
+          - !Ref Stage
 
   # - - - - - - - - - - - - - - - - -
   TaskRoleArn:
@@ -143,3 +229,48 @@ Outputs:
         - - ECS
           - TaskRoleArn
           - !Ref ProjectName
+          - !Ref Stage
+
+  S3BucketEcsExtras:
+    Value: !Ref S3BucketEcsExtras
+    Export:
+      Name: !Join
+        - '-'
+        - - S3Bucket
+          - !Ref ProjectName
+          - !Ref Stage
+          - ecs
+          - extras
+
+  S3BucketEcsExtrasArn:
+    Value: !GetAtt S3BucketEcsExtras.Arn
+    Export:
+      Name: !Join
+        - '-'
+        - - S3BucketArn
+          - !Ref ProjectName
+          - !Ref Stage
+          - ecs
+          - extras
+
+  S3BucketEcsLogs:
+    Value: !Ref S3BucketEcsLogs
+    Export:
+      Name: !Join
+        - '-'
+        - - S3Bucket
+          - !Ref ProjectName
+          - !Ref Stage
+          - ecs
+          - logs
+
+  S3BucketEcsLogsArn:
+    Value: !GetAtt S3BucketEcsLogs.Arn
+    Export:
+      Name: !Join
+        - '-'
+        - - S3BucketArn
+          - !Ref ProjectName
+          - !Ref Stage
+          - ecs
+          - logs

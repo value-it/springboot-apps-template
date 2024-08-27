@@ -9,7 +9,12 @@ Parameters:
   ProjectName:
     Type: String
     Default: bootapps-tmpl
-
+  Stage:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prd
 
 Resources:
   # - - - - - - - - - - - - - - - - -
