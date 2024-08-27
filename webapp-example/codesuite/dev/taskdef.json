@@ -8,9 +8,9 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/bootapps-tmpl",
+          "awslogs-group": "/ecs/bootapps-tmpl/dev",
           "awslogs-region": "ap-northeast-1",
-          "awslogs-stream-prefix": "dev"
+          "awslogs-stream-prefix": "webapp-example"
         }
       },
       "environment": [
