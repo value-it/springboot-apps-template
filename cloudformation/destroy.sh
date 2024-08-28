@@ -4,39 +4,48 @@
 
 STAGE=dev
 
+# ---
+
+# CloudFormationスタックのExportから値を取得するFunction
+get_exported_value (){
+    export_name=$1
+    aws cloudformation list-exports --query "Exports[?Name=='$export_name'].Value" --output text
+}
+
+# S3 バケット削除Function
+remove_s3_bucket (){
+    bucket_name=$1
+    echo "Deleting S3 bucket: $bucket_name"
+    # バージョニングされたオブジェクトの一覧を取得して削除
+    versions=$(aws s3api list-object-versions --bucket "$bucket_name" --query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}' --output=json)
+    if [ "$versions" != "null" ] && [ "$versions" != "[]" ]; then
+        echo "delete versions: $versions"
+        aws s3api delete-objects --bucket "$bucket_name" --delete "$versions" > /dev/null 2>&1
+    fi
+    # 削除としてマークされたオブジェクトの一覧を取得して削除
+    delete_markers=$(aws s3api list-object-versions --bucket "$bucket_name" --query='{Objects: DeleteMarkers[].{Key:Key,VersionId:VersionId}}' --output=json)
+    if [ "$delete_markers" != "null" ] && [ "$delete_markers" != "[]" ]; then
+        echo "delete markers: $delete_markers"
+        aws s3api delete-objects --bucket "$bucket_name" --delete "$delete_markers" > /dev/null 2>&1
+    fi
+    # バケット削除
+    aws s3 rb "s3://$bucket_name" --force
+    echo "S3 bucket $bucket_name has been deleted."
+}
+
+# ---
+
 # S3バケット削除
-echo "delete s3 bucket"
-# bootapps-tmpl-$STAGE-resources-base
-RES=`aws s3api delete-objects --bucket bootapps-tmpl-$STAGE-resources-base \
---delete "$(aws s3api list-object-versions --bucket bootapps-tmpl-$STAGE-resources-base \
---query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}')"`
-# バケット削除
-aws s3 rb s3://bootapps-tmpl-$STAGE-resources-base --force
-
-# bucket bootapps-tmpl-$STAGE-ecs-extras-base
-RES=`aws s3api delete-objects --bucket bootapps-tmpl-$STAGE-ecs-extras-base \
---delete "$(aws s3api list-object-versions --bucket bootapps-tmpl-$STAGE-ecs-extras-base \
---query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}')"`
-# バケット削除
-aws s3 rb s3://bootapps-tmpl-$STAGE-ecs-extras-base --force
-
-# bucket bootapps-tmpl-$STAGE-ecs-logs-base
-RES=`aws s3api delete-objects --bucket bootapps-tmpl-$STAGE-ecs-logs-base \
---delete "$(aws s3api list-object-versions --bucket bootapps-tmpl-$STAGE-ecs-logs-base \
---query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}')"`
-# バケット削除
-aws s3 rb s3://bootapps-tmpl-$STAGE-ecs-logs-base --force
-
-# bucket bootapps-tmpl-$STAGE-webapps-alb-logs-base
-RES=`aws s3api delete-objects --bucket bootapps-tmpl-$STAGE-webapps-alb-logs-base \
---delete "$(aws s3api list-object-versions --bucket bootapps-tmpl-$STAGE-webapps-alb-logs-base \
---query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}')"`
-# バケット削除
-aws s3 rb s3://bootapps-tmpl-$STAGE-webapps-alb-logs-base --force
+echo "delete s3 buckets"
+remove_s3_bucket $(get_exported_value "S3Bucket-bootapps-tmpl-$STAGE-resources")
+remove_s3_bucket $(get_exported_value "S3Bucket-bootapps-tmpl-$STAGE-ecs-extras")
+remove_s3_bucket $(get_exported_value "S3Bucket-bootapps-tmpl-$STAGE-ecs-logs")
+remove_s3_bucket $(get_exported_value "S3Bucket-bootapps-tmpl-$STAGE-webapps-alb-logs")
 
 # ECRリポジトリ削除
 echo "delete ecr repository"
 aws ecr delete-repository --repository-name bootapps-tmpl/$STAGE/webapp-example --force
+
 
 # ---
 

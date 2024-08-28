@@ -18,10 +18,11 @@ Parameters:
       - prd
   S3BucketNameSuffix:
     Type: String
-    Default: base
+    Default: ""
 
 Conditions:
   ShouldCreateServiceLinkedRole: !Equals [!Ref CreateServiceLinkedRole, "true"]
+  UseDefaultAccountId: !Equals [!Ref S3BucketNameSuffix, ""]
 
 # + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 Resources:
@@ -116,7 +117,10 @@ Resources:
           - !Ref Stage
           - ecs
           - extras
-          - !Ref S3BucketNameSuffix
+          - !If
+            - UseDefaultAccountId
+            - !Ref "AWS::AccountId"
+            - !Ref S3BucketNameSuffix
       AccessControl: Private
       BucketEncryption:
         ServerSideEncryptionConfiguration:
@@ -132,7 +136,10 @@ Resources:
               - !Ref Stage
               - ecs
               - extras
-              - !Ref S3BucketNameSuffix
+              - !If
+                - UseDefaultAccountId
+                - !Ref "AWS::AccountId"
+                - !Ref S3BucketNameSuffix
         - Key: ProjectName
           Value: !Ref ProjectName
 
@@ -148,7 +155,10 @@ Resources:
           - !Ref Stage
           - ecs
           - logs
-          - !Ref S3BucketNameSuffix
+          - !If
+            - UseDefaultAccountId
+            - !Ref "AWS::AccountId"
+            - !Ref S3BucketNameSuffix
       AccessControl: Private
       BucketEncryption:
         ServerSideEncryptionConfiguration:
@@ -169,7 +179,10 @@ Resources:
               - !Ref Stage
               - ecs
               - logs
-              - !Ref S3BucketNameSuffix
+              - !If
+                - UseDefaultAccountId
+                - !Ref "AWS::AccountId"
+                - !Ref S3BucketNameSuffix
         - Key: ProjectName
           Value: !Ref ProjectName
 

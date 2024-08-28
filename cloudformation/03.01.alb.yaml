@@ -22,7 +22,10 @@ Parameters:
     Default: arn:aws:iam::582318560864:root
   S3BucketNameSuffix:
     Type: String
-    Default: base
+    Default: ""
+
+Conditions:
+  UseDefaultAccountId: !Equals [!Ref S3BucketNameSuffix, ""]
 
 Resources:
   # ------------------------------------------------------------#
@@ -99,7 +102,16 @@ Resources:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
     Properties:
-      BucketName: !Sub ${ProjectName}-${Stage}-${AlbNameSuffix}-logs-${S3BucketNameSuffix}
+      BucketName: !Join
+        - '-'
+        - - !Ref ProjectName
+          - !Ref Stage
+          - !Ref AlbNameSuffix
+          - logs
+          - !If
+            - UseDefaultAccountId
+            - !Ref "AWS::AccountId"
+            - !Ref S3BucketNameSuffix
       AccessControl: Private
       VersioningConfiguration:
         Status: Suspended
@@ -115,7 +127,16 @@ Resources:
             ExpirationInDays: 90
       Tags:
         - Key: Name
-          Value: !Sub ${ProjectName}-${AlbNameSuffix}-logs-${Stage}
+          Value: !Join
+            - '-'
+            - - !Ref ProjectName
+              - !Ref Stage
+              - AlbNameSuffix
+              - logs
+              - !If
+                - UseDefaultAccountId
+                - !Ref "AWS::AccountId"
+                - !Ref S3BucketNameSuffix
         - Key: ProjectName
           Value: !Ref ProjectName
         - Key: Stage
@@ -131,7 +152,7 @@ Resources:
               - s3:PutObject
             Effect: Allow
             Resource:
-              - !Sub 'arn:aws:s3:::${ProjectName}-${Stage}-${AlbNameSuffix}-logs-${S3BucketNameSuffix}/*'
+              - !Sub 'arn:aws:s3:::${S3BucketForALBLogs}/*'
             Principal:
               AWS: !Ref AlbLogsS3BucketPrincipalAWSArn
 
@@ -154,3 +175,14 @@ Outputs:
     Value: !Ref ALBListenerForTest
     Export:
       Name: !Sub "${ProjectName}-${Stage}-${AlbNameSuffix}-listener-test"
+
+  S3BucketForALBLogs:
+    Value: !Ref S3BucketForALBLogs
+    Export:
+      Name: !Join
+        - '-'
+        - - S3Bucket
+          - !Ref ProjectName
+          - !Ref Stage
+          - !Ref AlbNameSuffix
+          - logs
