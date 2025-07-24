@@ -2,8 +2,8 @@ package example.web.presentation.controller.bookcatalog.booklist;
 
 import example.web.application.service.bookcatalog.BookFindService;
 import example.web.domain.model.bookcatalog.BookList;
+import example.web.presentation.viewmodel.bookcatalog.booklist.BookListViewModel;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,12 +19,13 @@ public class BookListController {
     }
 
     @GetMapping
-    String index() {
+    public String index() {
         return "bookcatalog/list";
     }
 
-    @ModelAttribute
-    private BookList addAttributes(Model model) {
-        return bookFindService.findAll();
+    @ModelAttribute("bookList")
+    private BookListViewModel bookListViewModel() {
+        BookList bookList = bookFindService.findAll();
+        return BookListViewModel.of(bookList);
     }
 }

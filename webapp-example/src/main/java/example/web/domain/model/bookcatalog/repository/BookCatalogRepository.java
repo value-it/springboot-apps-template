@@ -1,6 +1,9 @@
 package example.web.domain.model.bookcatalog.repository;
 
 import example.web.domain.model.bookcatalog.*;
+import example.web.domain.model.bookcatalog.book.Book;
+import example.web.domain.model.bookcatalog.book.BookId;
+import example.web.domain.model.bookcatalog.book.Title;
 
 public interface BookCatalogRepository {
 

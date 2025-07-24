@@ -1,67 +1,54 @@
 package example.web.presentation.controller.bookcatalog.bookregister;
 
-import example.web.domain.model.bookcatalog.*;
-import jakarta.validation.Valid;
+import example.web.domain.model.bookcatalog.book.Isbn;
+import example.web.domain.model.bookcatalog.NewBook;
+import example.web.domain.model.bookcatalog.book.Pages;
+import example.web.domain.model.bookcatalog.book.Title;
+import jakarta.validation.constraints.*;
 
-import java.util.Objects;
+public class BookRegisterForm {
 
-public final class BookRegisterForm {
-    @Valid
-    private final Title title;
-    @Valid
-    private final Isbn isbn;
-    @Valid
-    private final Pages pages;
+    @Size(max = 50, message = "書籍名は50文字以内で入力してください")
+    @NotEmpty(message = "書籍名を入力してください")
+    private final String title;
 
-    public BookRegisterForm(
-            String title,
-            String isbn,
-            Integer pages
-    ) {
-        this.title = new Title(title);
-        this.isbn = new Isbn(isbn);
-        this.pages = new Pages(pages);
+    @Size(min = 13, max = 13, message = "ISBNは13桁で入力してください")
+    @NotEmpty(message = "ISBNを入力してください")
+    @Pattern(regexp = "[0-9]+", message = "ISBNは数値で入力してください")
+    private final String isbn;
+
+    @Min(value = 1, message = "ページ数は1以上の整数を入力してください")
+    @Max(value = 10000, message = "ページ数は10000以内の整数を入力してください")
+    @NotNull(message = "ページ数を入力してください")
+    private final Integer pages;
+
+    public BookRegisterForm(String title, String isbn, Integer pages) {
+        this.title = title;
+        this.isbn = isbn;
+        this.pages = pages;
     }
 
-    public static BookRegisterForm of() {
+    public static BookRegisterForm init() {
         return new BookRegisterForm("", "", 0);
     }
 
-    public Book toDomainEntity(BookId bookId, BookRevision revision) {
-        return new Book(bookId, revision, this.title, this.isbn, this.pages);
+    public NewBook toDomainModel() {
+        return new NewBook(
+                new Title(title),
+                new Isbn(isbn),
+                new Pages(pages)
+        );
     }
 
-    public Title title() {
+    public String title() {
         return title;
     }
 
-    public Isbn isbn() {
+    public String isbn() {
         return isbn;
     }
 
-    public Pages pages() {
+    public Integer pages() {
         return pages;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        BookRegisterForm that = (BookRegisterForm) o;
-        return title.equals(that.title) && isbn.equals(that.isbn) && pages.equals(that.pages);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(title, isbn, pages);
-    }
-
-    @Override
-    public String toString() {
-        return "BookRegisterForm{" +
-                "title=" + title +
-                ", isbn=" + isbn +
-                ", pages=" + pages +
-                '}';
     }
 }

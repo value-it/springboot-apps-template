@@ -1,6 +1,9 @@
 package example.web.infrastructure.datasource.bookcatalog;
 
 import example.web.domain.model.bookcatalog.*;
+import example.web.domain.model.bookcatalog.book.Book;
+import example.web.domain.model.bookcatalog.book.BookId;
+import example.web.domain.model.bookcatalog.book.Title;
 import example.web.domain.model.bookcatalog.repository.BookCatalogRepository;
 import example.web.infrastructure.datasource.bookcatalog.dto.BookDto;
 import org.springframework.stereotype.Repository;

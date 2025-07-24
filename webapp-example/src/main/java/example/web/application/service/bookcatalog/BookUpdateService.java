@@ -1,7 +1,8 @@
 package example.web.application.service.bookcatalog;
 
-import example.web.domain.model.bookcatalog.Book;
-import example.web.domain.model.bookcatalog.BookId;
+import example.web.domain.model.bookcatalog.book.Book;
+import example.web.domain.model.bookcatalog.BookRevision;
+import example.web.domain.model.bookcatalog.ModifyBook;
 import example.web.domain.model.bookcatalog.repository.BookCatalogRepository;
 import example.web.presentation.controller.bookcatalog.bookeditor.BookEditForm;
 import org.springframework.stereotype.Service;
@@ -18,11 +19,12 @@ public class BookUpdateService {
     }
 
     public BookEditForm createBookEditForm(Long id) {
-        return BookEditForm.fromDomainEntity(bookFindService.findById(new BookId(id)));
+        return BookEditForm.of(bookFindService.findById(id));
     }
 
-    public void update(BookEditForm form) {
-        Book book = form.toDomainEntity(bookCatalogRepository.nextRevision());
+    public void update(ModifyBook modifyBook) {
+        BookRevision nextRevision = bookCatalogRepository.nextRevision();
+        Book book = Book.of(modifyBook, nextRevision);
         bookCatalogRepository.update(book);
     }
 }

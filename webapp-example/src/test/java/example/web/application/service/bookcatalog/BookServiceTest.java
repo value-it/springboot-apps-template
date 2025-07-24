@@ -1,9 +1,9 @@
 package example.web.application.service.bookcatalog;
 
 import example.web.domain.model.bookcatalog.*;
+import example.web.domain.model.bookcatalog.book.*;
 import example.web.presentation.controller.bookcatalog.bookeditor.BookEditForm;
 import example.web.presentation.controller.bookcatalog.bookregister.BookRegisterForm;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,6 @@ import static org.hamcrest.core.Is.is;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-@ActiveProfiles("with_h2db")
 class BookServiceTest {
 
     private final BookFindService bookFindService;
@@ -50,7 +49,7 @@ class BookServiceTest {
     @Sql({"classpath:db/migration/phase001/001_schema/V000_001_001__bookcatalog.sql",
             "classpath:db/migration/phase001/999_data/R__001_init.sql"})
     public void IDを指定して書籍取得() {
-        Book actual = bookFindService.findById(new BookId(10001L));
+        Book actual = bookFindService.findById(10001L);
         Book expected = new Book(new BookId(10001L), new BookRevision(1L), new Title("エンジェルタロット"), new Isbn("9784866540689"), new Pages(64));
         assertThat(actual, is(expected));
     }
@@ -62,9 +61,10 @@ class BookServiceTest {
         BookRegisterForm form =
                 new BookRegisterForm("ドラゴンボール1巻", "1234567890123", 50);
 
-        bookRegisterService.saveAsNew(form);
+        NewBook newBook = form.toDomainModel();
+        bookRegisterService.saveAsNew(newBook);
 
-        Book actual = bookFindService.findById(new BookId(10003L));
+        Book actual = bookFindService.findById(10003L);
         Book expected =
                 new Book(new BookId(10003L), new BookRevision(3L), new Title("ドラゴンボール1巻"), new Isbn("1234567890123"), new Pages(50));
         assertThat(actual, is(expected));
@@ -74,14 +74,16 @@ class BookServiceTest {
     @Sql({"classpath:db/migration/phase001/001_schema/V000_001_001__bookcatalog.sql",
             "classpath:db/migration/phase001/999_data/R__001_init.sql"})
     public void 書籍を更新() {
-        BookEditForm form =
-                new BookEditForm(10001L, "エンジェルタロット-編集済み", "9784866540680", 128);
+        Book book = bookFindService.findById(10001L);
+        BookEditForm form = BookEditForm.of(
+                new Book(book.bookId(), book.revision(), new Title("エンジェルタロット-編集済み"), book.isbn(), new Pages(128)));
+        ModifyBook modifyBook = form.toDomainModel();
 
-        bookUpdateService.update(form);
+        bookUpdateService.update(modifyBook);
 
-        Book actual = bookFindService.findById(new BookId(10001L));
+        Book actual = bookFindService.findById(10001L);
         Book expected =
-                new Book(new BookId(10001L), new BookRevision(3L), new Title("エンジェルタロット-編集済み"), new Isbn("9784866540680"), new Pages(128));
+                new Book(new BookId(10001L), new BookRevision(3L), new Title("エンジェルタロット-編集済み"), new Isbn("9784866540689"), new Pages(128));
         assertThat(actual, is(expected));
     }
 }

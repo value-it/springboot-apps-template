@@ -1,19 +1,28 @@
 package example.web.presentation.controller.bookcatalog.bookeditor;
 
 import example.web.domain.model.bookcatalog.*;
-import jakarta.validation.Valid;
+import example.web.domain.model.bookcatalog.book.*;
+import jakarta.validation.constraints.*;
 
-import java.util.Objects;
+public class BookEditForm {
 
-public final class BookEditForm {
-    @Valid
-    private final BookId bookId;
-    @Valid
-    private final Title title;
-    @Valid
-    private final Isbn isbn;
-    @Valid
-    private final Pages pages;
+    @Min(value = 1, message = "IDが不正です")
+    @NotNull(message = "IDが不正です")
+    private final Long id;
+
+    @Size(max = 50, message = "書籍名は50文字以内で入力してください")
+    @NotEmpty(message = "書籍名を入力してください")
+    private final String title;
+
+    @Size(min = 13, max = 13, message = "ISBNは13桁で入力してください")
+    @NotEmpty(message = "ISBNを入力してください")
+    @Pattern(regexp = "[0-9]+", message = "ISBNは数値で入力してください")
+    private final String isbn;
+
+    @Min(value = 1, message = "ページ数は1以上の整数を入力してください")
+    @Max(value = 10000, message = "ページ数は10000以内の整数を入力してください")
+    @NotNull(message = "ページ数を入力してください")
+    private final Integer pages;
 
     public BookEditForm(
             Long id,
@@ -21,59 +30,42 @@ public final class BookEditForm {
             String isbn,
             Integer pages
     ) {
-        this.bookId = new BookId(id);
-        this.title = new Title(title);
-        this.isbn = new Isbn(isbn);
-        this.pages = new Pages(pages);
+        this.id = id;
+        this.title = title;
+        this.isbn = isbn;
+        this.pages = pages;
     }
 
-    public static BookEditForm fromDomainEntity(Book book) {
-        return new BookEditForm(book.bookId().value(), book.title().value(), book.isbn().value(), book.pages().value());
+    public static BookEditForm of(Book book) {
+        return new BookEditForm(
+                book.bookId().value(),
+                book.title().value(),
+                book.isbn().value(),
+                book.pages().value());
     }
 
-    public Book toDomainEntity(BookRevision revision) {
-        return new Book(this.bookId, revision, this.title, this.isbn, this.pages);
+    public ModifyBook toDomainModel() {
+        return new ModifyBook(
+                new BookId(id),
+                new Title(title),
+                new Isbn(isbn),
+                new Pages(pages)
+        );
     }
 
-    public BookId bookId() {
-        return bookId;
+    public Long id() {
+        return id;
     }
 
-    public Title title() {
+    public String title() {
         return title;
     }
 
-    public Isbn isbn() {
+    public String isbn() {
         return isbn;
     }
 
-    public Pages pages() {
+    public Integer pages() {
         return pages;
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (BookEditForm) obj;
-        return Objects.equals(this.bookId, that.bookId) &&
-                Objects.equals(this.title, that.title) &&
-                Objects.equals(this.isbn, that.isbn) &&
-                Objects.equals(this.pages, that.pages);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(bookId, title, isbn, pages);
-    }
-
-    @Override
-    public String toString() {
-        return "BookEditForm[" +
-                "bookId=" + bookId + ", " +
-                "title=" + title + ", " +
-                "isbn=" + isbn + ", " +
-                "pages=" + pages + ']';
-    }
-
 }
