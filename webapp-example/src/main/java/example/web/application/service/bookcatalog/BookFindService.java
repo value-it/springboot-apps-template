@@ -1,7 +1,7 @@
 package example.web.application.service.bookcatalog;
 
-import example.web.domain.model.bookcatalog.Book;
-import example.web.domain.model.bookcatalog.BookId;
+import example.web.domain.model.bookcatalog.book.Book;
+import example.web.domain.model.bookcatalog.book.BookId;
 import example.web.domain.model.bookcatalog.BookList;
 import example.web.domain.model.bookcatalog.repository.BookCatalogRepository;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ public class BookFindService {
         return bookCatalogRepository.findAll();
     }
 
-    public Book findById(BookId bookId) {
-        return bookCatalogRepository.findById(bookId);
+    public Book findById(Long bookId) {
+        return bookCatalogRepository.findById(new BookId(bookId));
     }
 }

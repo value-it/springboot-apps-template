@@ -1,8 +1,10 @@
 package example.web.application.service.bookcatalog;
 
-import example.web.domain.model.bookcatalog.Book;
+import example.web.domain.model.bookcatalog.book.Book;
+import example.web.domain.model.bookcatalog.book.BookId;
+import example.web.domain.model.bookcatalog.BookRevision;
+import example.web.domain.model.bookcatalog.NewBook;
 import example.web.domain.model.bookcatalog.repository.BookCatalogRepository;
-import example.web.presentation.controller.bookcatalog.bookregister.BookRegisterForm;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,8 +16,10 @@ public class BookRegisterService {
         this.bookCatalogRepository = bookCatalogRepository;
     }
 
-    public void saveAsNew(BookRegisterForm form) {
-        Book book = form.toDomainEntity(bookCatalogRepository.nextId(), bookCatalogRepository.nextRevision());
+    public void saveAsNew(NewBook newBook) {
+        BookId nextId = bookCatalogRepository.nextId();
+        BookRevision nextRevision = bookCatalogRepository.nextRevision();
+        Book book = Book.of(newBook, nextId, nextRevision);
         bookCatalogRepository.saveAsNew(book);
     }
 }

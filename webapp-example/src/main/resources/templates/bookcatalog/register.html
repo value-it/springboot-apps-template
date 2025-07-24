@@ -17,18 +17,18 @@
     <form method="POST" th:object="${bookRegisterForm}">
         <div>
             <label for="title">書籍名：</label>
-            <input id="title" name="title" th:value="*{title.value}" type="text"/>
-            <p class="error-msg" th:errors="*{title.value}">エラーメッセージ</p>
+            <input id="title" th:field="*{title}" type="text"/>
+            <p class="error-msg" th:errors="*{title}">エラーメッセージ</p>
         </div>
         <div>
             <label for="isbn">ISBN：</label>
-            <input id="isbn" name="isbn" th:value="*{isbn.value}" type="text"/>
-            <p class="error-msg" th:errors="*{isbn.value}">エラーメッセージ</p>
+            <input id="isbn" th:field="*{isbn}" type="text"/>
+            <p class="error-msg" th:errors="*{isbn}">エラーメッセージ</p>
         </div>
         <div>
             <label for="pages">ページ数：</label>
-            <input id="pages" name="pages" th:value="*{pages.value}" type="number"/>
-            <p class="error-msg" th:errors="*{pages.value}">エラーメッセージ</p>
+            <input id="pages" th:field="*{pages}" type="number"/>
+            <p class="error-msg" th:errors="*{pages}">エラーメッセージ</p>
         </div>
         <div>
             <input type="submit" value="登録"/>

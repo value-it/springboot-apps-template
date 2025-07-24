@@ -27,12 +27,12 @@
             <th>ページ数</th>
             <th></th>
         </tr>
-        <tr th:each="record,stat: *{bookList.list}">
-            <td th:text="${record.bookId.value}"></td>
-            <td th:text="${record.title.value}"></td>
-            <td th:text="${record.isbn.value}"></td>
-            <td th:text="${record.pages.value}"></td>
-            <td><a th:href="@{/bookcatalog/editor(id=${record.bookId.value})}">編集</a></td>
+        <tr th:each="record: *{bookList.books}">
+            <td th:text="${record.bookId}"></td>
+            <td th:text="${record.title}"></td>
+            <td th:text="${record.isbn}"></td>
+            <td th:text="${record.pages}"></td>
+            <td><a th:href="@{/bookcatalog/editor(id=${record.bookId})}">編集</a></td>
         </tr>
     </table>
 </div>

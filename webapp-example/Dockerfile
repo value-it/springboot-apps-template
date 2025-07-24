@@ -5,4 +5,4 @@ WORKDIR /application
 COPY ./build/libs/ /application/
 
 ENV JAR_TARGET "webapp-example.jar"
-ENTRYPOINT ["sh","-c","java -jar -Dspring.profiles.active=with_h2db ./${JAR_TARGET}"]
+ENTRYPOINT ["sh","-c","java -jar ./${JAR_TARGET}"]

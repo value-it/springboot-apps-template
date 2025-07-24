@@ -1,6 +1,7 @@
 package example.web.infrastructure.datasource.bookcatalog.dto;
 
 import example.web.domain.model.bookcatalog.*;
+import example.web.domain.model.bookcatalog.book.*;
 
 public class BookDto {
     public Long bookId;
