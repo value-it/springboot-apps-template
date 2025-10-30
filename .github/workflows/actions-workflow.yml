@@ -1,4 +1,4 @@
-name: Codepipeline Trigger
+name: Build&Deploy workflow
 
 on:
   workflow_dispatch:
