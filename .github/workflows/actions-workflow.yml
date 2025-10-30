@@ -1,0 +1,104 @@
+name: Codepipeline Trigger
+
+on:
+  workflow_dispatch:
+    inputs:
+      ENV:
+        description: "Deployment environment"
+        required: true
+        default: dev
+
+permissions:
+  contents: read
+
+env:
+  ENV: ${{ inputs.ENV }}
+  AWS_REGION: ap-northeast-1
+  ECR_REPOSITORY_NAME: bootapps-tmpl/${{ inputs.ENV }}/webapp-example
+  IMAGE_TAG: ${{ github.sha }}
+  ARTIFACTS_DIR: artifacts
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # == Checkout the repository ==
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # == Configure AWS credentials ==
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # == Login to Amazon ECR ==
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # == Build Docker image ==
+      - name: Build Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          IMAGE_URI="$ECR_REGISTRY/${{ env.ECR_REPOSITORY_NAME }}:${{ env.IMAGE_TAG }}"
+          echo "IMAGE_URI=$IMAGE_URI" | tee -a "$GITHUB_ENV"
+          docker build -t "$IMAGE_URI" .
+
+      # == Push Docker image to ECR ==
+      - name: Push Docker image
+        run: |
+          docker push "$IMAGE_URI"
+
+      # == Replace AWS account ID into Task Definition ==
+      - name: Insert AWS Account ID to Task Definition
+        run: |
+          AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
+          echo "AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID" | tee -a "$GITHUB_ENV"
+          sed -i -e "s/<AWS_ACCOUNT_ID>/$AWS_ACCOUNT_ID/g" ./webapp-example/codesuite/${{ env.ENV }}/taskdef.json
+
+      # == Replace Image URI to Task Definition ==
+      - name: Insert Image URI to Task Definition
+        id: render-taskdef
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ./webapp-example/codesuite/${{ env.ENV }}/taskdef.json
+          container-name: webapp-example
+          image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_NAME }}:${{ env.IMAGE_TAG }}
+
+      # == Prepare artifacts ==
+      - name: Prepare CodeDeploy/ECS artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ${{ env.ARTIFACTS_DIR }}
+          
+          cp ./webapp-example/appspec.yaml ${{ env.ARTIFACTS_DIR }}/
+          cp "${{ steps.render-taskdef.outputs.task-definition }}" "${{ env.ARTIFACTS_DIR }}/taskdef.json"
+          
+          echo "Prepared artifacts in: ${{ env.ARTIFACTS_DIR }}"
+          ls -la ${{ env.ARTIFACTS_DIR }}
+
+      # Deploy to Amazon ECS via CodeDeploy
+      - name: Deploy to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ env.ARTIFACTS_DIR }}/taskdef.json
+          service:  bootapps-tmpl-${{ env.ENV }}-webapp-example-service
+          cluster: bootapps-tmpl-${{ env.ENV }}-cluster
+          wait-for-service-stability: true
+          codedeploy-appspec: ${{ env.ARTIFACTS_DIR }}/appspec.yaml
+          codedeploy-application: DeployApp-bootapps-tmpl-${{ env.ENV }}-webapp-example
+          codedeploy-deployment-group: DeploymentGroup-bootapps-tmpl-${{ env.ENV }}-webapp-example
+
+      # == Upload artifacts to GitHub Actions ==
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: codesuite-artifacts-${{ env.ENV }}-${{ github.run_id }}
+          path: ${{ env.ARTIFACTS_DIR }}
