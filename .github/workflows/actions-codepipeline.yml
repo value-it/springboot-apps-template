@@ -1,4 +1,4 @@
-name: Codepipeline Trigger
+name: Trigger AWS Codepipeline
 
 on:
   workflow_dispatch:
@@ -7,7 +7,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      # == Checkout the repository ==
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # == Trigger AWS CodePipeline ==
       - name: Trigger AWS CodePipeline
         # v1.0.7
         uses: zulhfreelancer/aws-codepipeline-action@492467f78d67ac2301e55e208326a8e9fbd23284

@@ -1,4 +1,4 @@
-name: Build&Deploy workflow
+name: Build & Deploy Workflow
 
 on:
   workflow_dispatch:
@@ -19,7 +19,7 @@ env:
   ARTIFACTS_DIR: artifacts
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
