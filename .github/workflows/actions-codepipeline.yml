@@ -13,7 +13,7 @@ env:
   PIPELINE_NAME: bootapps-tmpl-${{ inputs.ENV }}-webapp-example-pipeline
 
 jobs:
-  deploy:
+  trigger-codepipeline:
     runs-on: ubuntu-latest
     steps:
       # == Checkout the repository ==
