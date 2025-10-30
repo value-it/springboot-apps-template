@@ -7,3 +7,6 @@ Resources:
         LoadBalancerInfo:
           ContainerName: "webapp-example"
           ContainerPort: "38080"
+        NetworkConfiguration:
+          AwsvpcConfiguration:
+            AssignPublicIp: "ENABLED"
