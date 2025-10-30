@@ -31,7 +31,7 @@ https://docs.aws.amazon.com/ja_jp/cli/latest/userguide/cli-configure-profiles.ht
 
 ---
 
-## 手順
+## 構築手順
 
 ### 0. 環境変数設定
 事前に作成したAWSプロファイルを指定（プロファイル名は適宜修正）
@@ -142,28 +142,50 @@ aws cloudformation deploy \
 
 ---
 
-### パイプライン実行
+## CI/CDパイプライン実行
+注）CloudFormationでCodePipelineを作成したタイミングで自動実行されているため初期構築時は不要
+
+### CLIから実行する場合
+```shell
+# CodePipeline実行
+aws codepipeline start-pipeline-execution --name bootapps-tmpl-$STAGE-webapp-example-pipeline
+# 状態確認
+aws codepipeline get-pipeline-execution --pipeline-name bootapps-tmpl-$STAGE-webapp-example-pipeline --pipeline-execution-id $(aws codepipeline list-pipeline-executions --pipeline-name bootapps-tmpl-$STAGE-webapp-example-pipeline --max-results 1 | jq -r '.pipelineExecutionSummaries[0].pipelineExecutionId')
+```
+
+### マネージドコンソールから実行する場合
 https://ap-northeast-1.console.aws.amazon.com/codesuite/codepipeline/pipelines?region=ap-northeast-1
-1. `変更をリリースする` ボタンでpipeline開始
-2. `ApprovalStage` で承認操作を行う
-3. [CodeDeploy](https://ap-northeast-1.console.aws.amazon.com/codesuite/codedeploy/deployments?region=ap-northeast-1) でBlue/Greenのトラフィック移行
+- `変更をリリースする` ボタンでpipeline開始
 
-####
-以下のエラーによりECSのデプロイが出来ない場合はEC2インスタンスをスペック等何でも良いので1台起動する
 
-`You've reached the limit on the number of tasks you can run concurrently.`
-
-[参考情報](https://repost.aws/questions/QUiWCpad5jReKxxTiWjKfeyA/how-to-solve-the-ecs-error-youve-reached-the-limit-on-the-number-of-tasks-you-can-run-concurrently)
+### 補足
+- 以下のエラーによりECSのデプロイが出来ない場合はEC2インスタンスをスペック等何でも良いので1台起動する
+  - `You've reached the limit on the number of tasks you can run concurrently.`
+  - [参考情報](https://repost.aws/questions/QUiWCpad5jReKxxTiWjKfeyA/how-to-solve-the-ecs-error-youve-reached-the-limit-on-the-number-of-tasks-you-can-run-concurrently)
 
 ---
 
 ## ECSタスク起動
+- 初期タスク数は0のため1以上に更新する
 ```shell
 # webapp-example
 aws ecs update-service \
 --cluster bootapps-tmpl-$STAGE-cluster \
 --service bootapps-tmpl-$STAGE-webapp-example-service \
 --desired-count 1 > /dev/null 2>&1
+```
+
+---
+
+## アクセス
+### ALBのDNS名を確認
+```shell
+ALB_DNS=$(aws elbv2 describe-load-balancers \
+  --names bootapps-tmpl-$STAGE-webapps-alb \
+  --query "LoadBalancers[0].DNSName" \
+  --output text)
+
+echo "URL: http://$ALB_DNS/"
 ```
 
 ---

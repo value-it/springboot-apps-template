@@ -56,17 +56,17 @@ Resources:
           ContainerName: !Ref ApplicationName
       NetworkConfiguration:
         AwsvpcConfiguration:
-          AssignPublicIp: DISABLED
+          AssignPublicIp: ENABLED # Publicサブネットで動かす場合はパブリックIPを割り当てないとインターネットに出られない
           SecurityGroups:
             - Fn::ImportValue:
                 !Sub ${ProjectName}-${Stage}-sg-ecs
           Subnets:
             - Fn::ImportValue:
-                !Sub ${ProjectName}-${Stage}-network-private1-subnet
+                !Sub ${ProjectName}-${Stage}-network-public1-subnet
             - Fn::ImportValue:
-                !Sub ${ProjectName}-${Stage}-network-private2-subnet
+                !Sub ${ProjectName}-${Stage}-network-public2-subnet
             - Fn::ImportValue:
-                !Sub ${ProjectName}-${Stage}-network-private3-subnet
+                !Sub ${ProjectName}-${Stage}-network-public3-subnet
       ServiceName: !Join
                       - '-'
                       - - !Ref ProjectName

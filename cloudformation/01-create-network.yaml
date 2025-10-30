@@ -85,61 +85,61 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub "${ProjectName}-${Stage}-network-public3-subnet"
-
-  # Private1 Subnet Create
-  Private1Subnet:
-    Type: "AWS::EC2::Subnet"
-    Properties:
-      AvailabilityZone: "ap-northeast-1a"
-      CidrBlock: "10.0.10.0/24"
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: !Sub "${ProjectName}-${Stage}-network-private1-subnet"
-
-  # Private2 Subnet Create
-  Private2Subnet:
-    Type: "AWS::EC2::Subnet"
-    Properties:
-      AvailabilityZone: "ap-northeast-1c"
-      CidrBlock: "10.0.11.0/24"
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: !Sub "${ProjectName}-${Stage}-network-private2-subnet"
-
-  # Private3 Subnet Create
-  Private3Subnet:
-    Type: "AWS::EC2::Subnet"
-    Properties:
-      AvailabilityZone: "ap-northeast-1d"
-      CidrBlock: "10.0.12.0/24"
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: !Sub "${ProjectName}-${Stage}-network-private3-subnet"
-
-  # ------------------------------------------------------------#
-  #  NAT Gateway
-  # ------------------------------------------------------------#
-  NATGateway:
-    Type: "AWS::EC2::NatGateway"
-    Properties:
-      # NAT ゲートウェイに関連付ける Elastic IPアドレスの割り当て ID
-      AllocationId: !GetAtt NATGatewayAEIP.AllocationId
-      SubnetId: !Ref Public1Subnet
-      Tags:
-        - Key: Name
-          Value: !Sub "${ProjectName}-${Stage}-network-natgw"
-  # NATGateway For Elastic IP Create
-  NATGatewayAEIP:
-    Type: "AWS::EC2::EIP"
-    Properties:
-      # ------------------------------------------------------
-      # Elastic IP アドレスが VPC のインスタンスで使用するか、
-      # EC2-Classic のインスタンスで使用するか
-      # ------------------------------------------------------
-      Domain: vpc
+#
+#  # Private1 Subnet Create
+#  Private1Subnet:
+#    Type: "AWS::EC2::Subnet"
+#    Properties:
+#      AvailabilityZone: "ap-northeast-1a"
+#      CidrBlock: "10.0.10.0/24"
+#      VpcId: !Ref VPC
+#      Tags:
+#        - Key: Name
+#          Value: !Sub "${ProjectName}-${Stage}-network-private1-subnet"
+#
+#  # Private2 Subnet Create
+#  Private2Subnet:
+#    Type: "AWS::EC2::Subnet"
+#    Properties:
+#      AvailabilityZone: "ap-northeast-1c"
+#      CidrBlock: "10.0.11.0/24"
+#      VpcId: !Ref VPC
+#      Tags:
+#        - Key: Name
+#          Value: !Sub "${ProjectName}-${Stage}-network-private2-subnet"
+#
+#  # Private3 Subnet Create
+#  Private3Subnet:
+#    Type: "AWS::EC2::Subnet"
+#    Properties:
+#      AvailabilityZone: "ap-northeast-1d"
+#      CidrBlock: "10.0.12.0/24"
+#      VpcId: !Ref VPC
+#      Tags:
+#        - Key: Name
+#          Value: !Sub "${ProjectName}-${Stage}-network-private3-subnet"
+#
+#  # ------------------------------------------------------------#
+#  #  NAT Gateway
+#  # ------------------------------------------------------------#
+#  NATGateway:
+#    Type: "AWS::EC2::NatGateway"
+#    Properties:
+#      # NAT ゲートウェイに関連付ける Elastic IPアドレスの割り当て ID
+#      AllocationId: !GetAtt NATGatewayAEIP.AllocationId
+#      SubnetId: !Ref Public1Subnet
+#      Tags:
+#        - Key: Name
+#          Value: !Sub "${ProjectName}-${Stage}-network-natgw"
+#  # NATGateway For Elastic IP Create
+#  NATGatewayAEIP:
+#    Type: "AWS::EC2::EIP"
+#    Properties:
+#      # ------------------------------------------------------
+#      # Elastic IP アドレスが VPC のインスタンスで使用するか、
+#      # EC2-Classic のインスタンスで使用するか
+#      # ------------------------------------------------------
+#      Domain: vpc
 
   # ------------------------------------------------------------#
   #  RouteTable
@@ -153,14 +153,14 @@ Resources:
         - Key: Name
           Value: !Sub "${ProjectName}-${Stage}-network-public-route"
 
-  # Private RouteTable Create
-  PrivateRouteTable:
-    Type: "AWS::EC2::RouteTable"
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: !Sub "${ProjectName}-${Stage}-network-private-route"
+#  # Private RouteTable Create
+#  PrivateRouteTable:
+#    Type: "AWS::EC2::RouteTable"
+#    Properties:
+#      VpcId: !Ref VPC
+#      Tags:
+#        - Key: Name
+#          Value: !Sub "${ProjectName}-${Stage}-network-private-route"
 
   # ------------------------------------------------------------#
   # Routing
@@ -173,12 +173,12 @@ Resources:
       DestinationCidrBlock: "0.0.0.0/0"
       GatewayId: !Ref InternetGateway
 
-  PrivateRoute:
-    Type: "AWS::EC2::Route"
-    Properties:
-      RouteTableId: !Ref PrivateRouteTable
-      DestinationCidrBlock: "0.0.0.0/0"
-      NatGatewayId: !Ref NATGateway
+#  PrivateRoute:
+#    Type: "AWS::EC2::Route"
+#    Properties:
+#      RouteTableId: !Ref PrivateRouteTable
+#      DestinationCidrBlock: "0.0.0.0/0"
+#      NatGatewayId: !Ref NATGateway
 
   # ------------------------------------------------------------#
   # RouteTable Associate
@@ -200,21 +200,21 @@ Resources:
       SubnetId: !Ref Public3Subnet
       RouteTableId: !Ref PublicRouteTable
 
-  Private1SubnetRouteTableAssociation:
-    Type: "AWS::EC2::SubnetRouteTableAssociation"
-    Properties:
-      SubnetId: !Ref Private1Subnet
-      RouteTableId: !Ref PrivateRouteTable
-  Private2SubnetRouteTableAssociation:
-    Type: "AWS::EC2::SubnetRouteTableAssociation"
-    Properties:
-      SubnetId: !Ref Private2Subnet
-      RouteTableId: !Ref PrivateRouteTable
-  Private3SubnetRouteTableAssociation:
-    Type: "AWS::EC2::SubnetRouteTableAssociation"
-    Properties:
-      SubnetId: !Ref Private3Subnet
-      RouteTableId: !Ref PrivateRouteTable
+#  Private1SubnetRouteTableAssociation:
+#    Type: "AWS::EC2::SubnetRouteTableAssociation"
+#    Properties:
+#      SubnetId: !Ref Private1Subnet
+#      RouteTableId: !Ref PrivateRouteTable
+#  Private2SubnetRouteTableAssociation:
+#    Type: "AWS::EC2::SubnetRouteTableAssociation"
+#    Properties:
+#      SubnetId: !Ref Private2Subnet
+#      RouteTableId: !Ref PrivateRouteTable
+#  Private3SubnetRouteTableAssociation:
+#    Type: "AWS::EC2::SubnetRouteTableAssociation"
+#    Properties:
+#      SubnetId: !Ref Private3Subnet
+#      RouteTableId: !Ref PrivateRouteTable
 
 # ------------------------------------------------------------#
 # Output Parameters
@@ -242,20 +242,20 @@ Outputs:
     Export:
       Name: !Sub "${ProjectName}-${Stage}-network-public3-subnet"
 
-  Private1Subnet:
-    Value: !Ref Private1Subnet
-    Export:
-      Name: !Sub "${ProjectName}-${Stage}-network-private1-subnet"
-
-  Private2Subnet:
-    Value: !Ref Private2Subnet
-    Export:
-      Name: !Sub "${ProjectName}-${Stage}-network-private2-subnet"
-
-  Private3Subnet:
-    Value: !Ref Private3Subnet
-    Export:
-      Name: !Sub "${ProjectName}-${Stage}-network-private3-subnet"
+#  Private1Subnet:
+#    Value: !Ref Private1Subnet
+#    Export:
+#      Name: !Sub "${ProjectName}-${Stage}-network-private1-subnet"
+#
+#  Private2Subnet:
+#    Value: !Ref Private2Subnet
+#    Export:
+#      Name: !Sub "${ProjectName}-${Stage}-network-private2-subnet"
+#
+#  Private3Subnet:
+#    Value: !Ref Private3Subnet
+#    Export:
+#      Name: !Sub "${ProjectName}-${Stage}-network-private3-subnet"
 
   VPCCidrBlock:
     Value: !GetAtt VPC.CidrBlock

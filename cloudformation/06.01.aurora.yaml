@@ -65,14 +65,14 @@ Resources:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
       DBSubnetGroupName: !Sub ${ProjectName}-${Stage}-db-subnet-group
-      DBSubnetGroupDescription: Private Subnet for Aurora
+      DBSubnetGroupDescription: Public Subnet for Aurora
       SubnetIds:
         - Fn::ImportValue:
-            !Sub "${ProjectName}-${Stage}-network-private1-subnet"
+            !Sub "${ProjectName}-${Stage}-network-public1-subnet"
         - Fn::ImportValue:
-            !Sub "${ProjectName}-${Stage}-network-private2-subnet"
+            !Sub "${ProjectName}-${Stage}-network-public2-subnet"
         - Fn::ImportValue:
-            !Sub "${ProjectName}-${Stage}-network-private3-subnet"
+            !Sub "${ProjectName}-${Stage}-network-public3-subnet"
       Tags:
         - Key: Name
           Value: !Join
