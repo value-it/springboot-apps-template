@@ -6,6 +6,7 @@ on:
       - develop
     paths:
       - 'webapp-example/**'
+  workflow_dispatch:
 
 jobs:
   deploy:

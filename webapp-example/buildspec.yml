@@ -3,14 +3,8 @@ version: 0.2
 env:
   variables:
     DOCKER_BUILDKIT: "1"
-  parameter-store:
-    DOCKERHUB_USERNAME: /CI/DOCKERHUB_USERNAME
-    DOCKERHUB_PASSWORD: /CI/DOCKERHUB_PASSWORD
 
 phases:
-  install:
-    runtime-versions:
-      java: corretto21
   pre_build:
     commands:
       - DEFAULT=`pwd`
@@ -18,20 +12,13 @@ phases:
 
       - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
 
-      - echo login Docker Hub
-      - echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
-
       - echo login ECR
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.ap-northeast-1.amazonaws.com
 
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
   build:
     commands:
-      - echo build webapp-example
-      - ./gradlew webapp-example:build -x test
-
-      - echo build webapp-example Docker image
-      - cd ./webapp-example
+      - echo build Docker image
       - docker image build -t $IMAGE_REPOSITORY_NAME:$IMAGE_TAG .
       - docker image tag $IMAGE_REPOSITORY_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPOSITORY_NAME:$IMAGE_TAG
       - docker image tag $IMAGE_REPOSITORY_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPOSITORY_NAME:latest
@@ -39,12 +26,10 @@ phases:
     commands:
       - docker image push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPOSITORY_NAME:latest
       - docker image push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPOSITORY_NAME:$IMAGE_TAG
-      - cp appspec.yaml $DEFAULT/
-      - cp ./codesuite/${ENV,,}/taskdef.json $DEFAULT/
+      - cp ./webapp-example/appspec.yaml $DEFAULT/
+      - cp ./webapp-example/codesuite/${ENV,,}/taskdef.json $DEFAULT/
       - cd $DEFAULT
       - sed -i -e "s/<AWS_ACCOUNT_ID>/$AWS_ACCOUNT_ID/g" taskdef.json
-      - sed -i -e "s/<ECS_EXTRA_S3_BUCKET_NAME>/$ECS_EXTRA_S3_BUCKET_NAME/g" taskdef.json
-      - sed -i -e "s@<CONF_S3_PATH_PREFIX>@$CONF_S3_PATH_PREFIX@g" taskdef.json
 
       - printf '{"Version":"1.0","ImageURI":"%s"}' $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPOSITORY_NAME:$IMAGE_TAG > imageDetail.json
 artifacts:
