@@ -1,11 +1,6 @@
 name: Codepipeline Trigger
 
 on:
-  push:
-    branches:
-      - develop
-    paths:
-      - 'webapp-example/**'
   workflow_dispatch:
 
 jobs:
