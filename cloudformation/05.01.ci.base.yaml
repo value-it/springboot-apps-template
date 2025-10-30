@@ -159,17 +159,17 @@ Resources:
                         - '/'
                         - - !Sub arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:subnet
                           - Fn::ImportValue:
-                              !Sub ${ProjectName}-${Stage}-network-private1-subnet
+                              !Sub ${ProjectName}-${Stage}-network-public1-subnet
                       - !Join
                         - '/'
                         - - !Sub arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:subnet
                           - Fn::ImportValue:
-                              !Sub ${ProjectName}-${Stage}-network-private2-subnet
+                              !Sub ${ProjectName}-${Stage}-network-public2-subnet
                       - !Join
                         - '/'
                         - - !Sub arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:subnet
                           - Fn::ImportValue:
-                              !Sub ${ProjectName}-${Stage}-network-private3-subnet
+                              !Sub ${ProjectName}-${Stage}-network-public3-subnet
 
         - PolicyName: SecretManager
           PolicyDocument:

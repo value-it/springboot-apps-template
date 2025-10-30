@@ -56,20 +56,20 @@ Resources:
       ServiceRole:
         Fn::ImportValue:
           !Sub CodebuildRole-${ProjectName}-${Stage}
-      VpcConfig:
-        VpcId:
-          Fn::ImportValue:
-            !Sub ${ProjectName}-${Stage}-network-vpc
-        SecurityGroupIds:
-          - Fn::ImportValue:
-              !Sub ${ProjectName}-${Stage}-sg-ecs
-        Subnets:
-          - Fn::ImportValue:
-              !Sub ${ProjectName}-${Stage}-network-private1-subnet
-          - Fn::ImportValue:
-              !Sub ${ProjectName}-${Stage}-network-private2-subnet
-          - Fn::ImportValue:
-              !Sub ${ProjectName}-${Stage}-network-private3-subnet
+#      VpcConfig:
+#        VpcId:
+#          Fn::ImportValue:
+#            !Sub ${ProjectName}-${Stage}-network-vpc
+#        SecurityGroupIds:
+#          - Fn::ImportValue:
+#              !Sub ${ProjectName}-${Stage}-sg-codebuild
+#        Subnets:
+#          - Fn::ImportValue:
+#              !Sub ${ProjectName}-${Stage}-network-public1-subnet
+#          - Fn::ImportValue:
+#              !Sub ${ProjectName}-${Stage}-network-public2-subnet
+#          - Fn::ImportValue:
+#              !Sub ${ProjectName}-${Stage}-network-public3-subnet
       Environment:
         Type: LINUX_CONTAINER
         # CodeBuild内でdockerビルドできるようにするために特権付与
