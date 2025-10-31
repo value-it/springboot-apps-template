@@ -9,7 +9,7 @@
 - DBテーブルはすべてイミュータブル（UPDATE無しの設計）
 - オプションとしてDockerでPostgreSQLでも起動可能
 - CI/CD構成でAWS(ECS)に環境構築可能
-  - [手順・CloudFormationコード](./cloudformation/README.md)
+  - [手順・CloudFormationコード](infrastructure/cloudformation/README.md)
 
 ## 前提
 
