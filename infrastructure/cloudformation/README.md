@@ -120,7 +120,7 @@ Blue/Greenデプロイ等の高度なデプロイ戦略が不要な場合はCode
 ```mermaid
 flowchart LR
 %% Developer and GitHub
-  A[開発者] -->|push| B[ソースコード管理システム/GitHub]
+  A[開発者] -->|push| B[ソースコード管理システム]
   J[Jenkins等/自動ビルド&テスト] -->|pull| B
 
 %% CI: Build & Push in GitHub Actions
