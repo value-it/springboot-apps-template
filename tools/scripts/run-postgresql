@@ -2,6 +2,6 @@
 
 CURRENT_DIR=$(cd $(dirname $0); pwd)
 
-cd $CURRENT_DIR/../../docker/springboot-apps-template
+cd $CURRENT_DIR/../docker/springboot-apps-template
 
 docker compose -f docker-compose.yml up
