@@ -63,12 +63,13 @@ flowchart LR
   A[開発者] -->|push| B[ソースコード管理システム]
   C[CodePipeline] -->|pull| B
 
+
 %% Pipeline execution
-  C --> D[CodeBuild/自動ビルド&テスト]
-  D -->|1. ビルド済み資産Push| E[(ECR)]
-  D -->|2. デプロイ要求| H[CodeDeploy]
-  H -->|3. デプロイ| G[ECS]
-  E -.->|4. ビルド済み資産Pull| G
+  C -->|1. ビルド要求| D[CodeBuild/自動ビルド&テスト]
+  D -->|2. ビルド済み資産Push| E[(ECR)]
+  C -->|3. デプロイ要求| H[CodeDeploy]
+  H -->|4. デプロイ| G[ECS]
+  E -.->|5. ビルド済み資産Pull| G
 
 %% Styles
   classDef dev fill:#58b09c,color:#fff;
@@ -79,7 +80,7 @@ flowchart LR
 
   class A dev;
   class B git;
-  class C,D ci;
+  class C,D,J ci;
   class H cd;
   class E,G infra;
 
@@ -89,8 +90,9 @@ flowchart LR
 ```mermaid
 flowchart LR
 %% Developer and GitHub
-  A[開発者] -->|push| B[ソースコード管理システム/GitHub]
-  J[GitHubActions Workflow/自動ビルド&テスト] <-->|dispatch| B
+  A[開発者] -->|push| B[GitHub]
+  B -->|dispatch| J[GitHubActions Workflow/自動ビルド&テスト]
+
 
 %% CI: Build & Push in GitHub Actions
   J -->|1. ビルド済み資産Push| E[(ECR)]
