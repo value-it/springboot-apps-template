@@ -59,7 +59,7 @@ flowchart LR
 flowchart LR
 %% Developer and GitHub
   A[開発者] -->|push| B[ソースコード管理システム/GitHub]
-  J[GitHubActions Workflow/自動ビルド&テスト] <-->|pull| B
+  J[GitHubActions Workflow/自動ビルド&テスト] <-->|dispatch| B
 
 %% CI: Build & Push in GitHub Actions
   J -->|1. ビルド済み資産Push| E[(ECR)]
