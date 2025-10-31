@@ -6,7 +6,7 @@ FROM public.ecr.aws/amazoncorretto/amazoncorretto:21 AS build
 WORKDIR /app
 
 COPY . ./
-RUN ./gradlew clean webapp-example:build --no-daemon -x test
+RUN ./gradlew clean webapp-example:build --no-daemon
 
 
 
