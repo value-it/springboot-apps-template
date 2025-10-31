@@ -1,4 +1,4 @@
-# SpringBoot雛形アプリをCI/CD構成でAWSに構築する手順
+# AWS環境構築
 
 ## 概要
 - ECS Fargateにデプロイ
@@ -6,6 +6,37 @@
   - CodePipeline + CodeBuild + CodeDeploy
   - GitHub Actions + CodeDeploy
 - AWS各種リソースはCloudFormationで構築
+
+## AWS環境
+### 構成概要図
+```mermaid
+flowchart LR
+  subgraph VPC ["VPC (東京Region)"]
+    subgraph Public ["Public Subnets (AZ-a / AZ-c / AZ-d)"]
+      ALB["Application Load Balancer"]
+      Lprod["Listener :80 (Prod)"]
+      Ltest["Listener :81 (Test)"]
+      TGblue["Target Group BLUE (Port:38080, Live)"]
+      TGgreen["Target Group GREEN (Port:38080, Candidate)"]
+      subgraph ECS ["ECS Service (Fargate)"]
+        BlueTasks["ECS Tasks (BLUE)"]
+        GreenTasks["ECS Tasks (GREEN)"]
+      end
+    end
+  end
+
+  ALB -->|本番アクセス| Lprod
+  ALB .->|テストアクセス| Ltest
+  Lprod --> TGblue
+  Ltest --> TGgreen
+  TGblue -->|Port :38080 register| BlueTasks
+  TGgreen -->|Port :38080 register| GreenTasks
+
+  CD["CodeDeploy (ECS Blue/Green)"]
+  CD -.Blue/Greenデプロイ.-> ECS
+```
+
+
 
 ## CI/CDについて
 ### CI/CD概念図
@@ -59,7 +90,7 @@ flowchart LR
 flowchart LR
 %% Developer and GitHub
   A[開発者] -->|push| B[ソースコード管理システム/GitHub]
-  J[GitHubActions Workflow/自動ビルド&テスト] <-->|pull| B
+  J[GitHubActions Workflow/自動ビルド&テスト] <-->|dispatch| B
 
 %% CI: Build & Push in GitHub Actions
   J -->|1. ビルド済み資産Push| E[(ECR)]
