@@ -1,3 +1,9 @@
+buildscript {
+    dependencies {
+        classpath("org.flywaydb:flyway-database-postgresql:${flywayVersion}")
+    }
+}
+
 plugins {
     id "org.flywaydb.flyway" version "${flywayVersion}"
     id 'java'
